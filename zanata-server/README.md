@@ -9,7 +9,7 @@ This image has been tested with Docker 1.8
 To build this docker image, simply type the following command:
 
 ```sh
-$ docker build -t zanata/server:3.7.1 .
+$ docker build -t zanata/server:3.7.3 .
 ```
 
 The `-t` parameter indicates a tag for the image.
@@ -47,7 +47,7 @@ The command above starts a docker container running mariadb for a database calle
 Run the following command to start the wildfly container with Zanata in tow. It will link the database container (`--link`) named `zanatadb` (same name which was given to the database container above) to the alias `db`.
 
 ```sh
-$ docker run -it -P --link=zanatadb:db zanata/server:3.7.1
+$ docker run -it -P --link=zanatadb:db zanata/server:3.7.3
 ```
 
 ## Create an admin user
@@ -76,3 +76,7 @@ and look at the `PORTS` column. It should tell you which port is being forwarded
 
 Just open a browser and head to `http://IP_ADDRESS:PORT/zanata`, where `PORT` is the port determined in the previous step, and `IP_ADDRESS` is the docker host's address (again, this might localhost or some other IP address if running on OSX for example).
 
+## DockerHub
+
+The DockerHub site for Zanata images is here:
+https://hub.docker.com/r/zanata/server/

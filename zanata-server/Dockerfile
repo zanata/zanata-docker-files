@@ -1,4 +1,4 @@
-FROM jboss/wildfly
+FROM jboss/wildfly:9.0.1.Final
 
 USER root
 RUN yum -y install mysql-connector-java mysql wget
@@ -11,7 +11,7 @@ RUN wget http://sourceforge.net/projects/zanata/files/wildfly/wildfly-8.1.0.Fina
 
 # Zanata war
 RUN wget -O /opt/jboss/wildfly/standalone/deployments/zanata.war \ 
-    https://github.com/zanata/zanata-server/releases/download/server-3.7.1/zanata-war-3.7.1.war \
+    https://github.com/zanata/zanata-server/releases/download/server-3.7.3/zanata-war-3.7.3.war \
     && chmod o+rw /opt/jboss/wildfly/standalone/deployments/zanata.war
 
 # standalone.xml
