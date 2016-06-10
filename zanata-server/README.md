@@ -6,15 +6,21 @@ This image has been tested with Docker 1.8
 
 ## Building
 
-To build this docker image, simply type the following command:
+To build this docker image as "latest", simply type the following command:
 
 ```sh
-$ docker build -t zanata/server:$VERSION .
+$ docker build -t zanata/server .
 ```
 
-Replace $VERSION with the version you want to tag, eg 3.8.4. Be careful about overwriting existing versions.
+If you want to build with a different tag, eg 3.8.4, use a command like this:
 
-The `-t` parameter indicates a tag for the image.
+```sh
+$ docker build -t zanata/server:3.8.4 .
+```
+
+Be careful about overwriting existing versions.
+
+The `-t` parameter indicates the name and/or tag for the image.
 
 ## Running a Zanata server with Docker
 
@@ -49,10 +55,10 @@ The command above starts a docker container running mariadb for a database calle
 Run the following command to start the wildfly container with Zanata in tow. It will link the database container (`--link`) named `zanatadb` (same name which was given to the database container above) to the alias `db`.
 
 ```sh
-$ docker run -it -P --link=zanatadb:db zanata/server:$VERSION
+$ docker run -it -P --link=zanatadb:db zanata/server
 ```
 
-Replace $VERSION with the version you want to run, eg 3.8.4. Check DockerHub for available versions.
+If you want to use a different tag, replace `zanata/server` with `zanata/server:3.8.4` or similar. Check DockerHub for available versions.
 
 
 ## Create an admin user
