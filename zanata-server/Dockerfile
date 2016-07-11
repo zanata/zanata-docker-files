@@ -10,7 +10,7 @@ RUN ln -sf /usr/share/java/mysql-connector-java.jar /opt/jboss/wildfly/standalon
 RUN wget --no-verbose https://dl.bintray.com/sflanigan/generic/wildfly-module-hibernate-main-4.2.20.Final.zip \
     && unzip -q wildfly-module-hibernate-main-4.2.20.Final.zip -d /opt/jboss/wildfly
 
-ENV ZANATA_VERSION 3.9.0
+ENV ZANATA_VERSION 3.9.1
 
 # Zanata war
 RUN wget --no-verbose -O /opt/jboss/wildfly/standalone/deployments/zanata.war \
