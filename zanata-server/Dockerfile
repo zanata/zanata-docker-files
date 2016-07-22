@@ -4,7 +4,7 @@ MAINTAINER "Ding-Yi Chen" <dchen@redhat.com>
 EXPOSE 8080
 # Version should be assigned in build time
 # Take care editing the ZANATA_VERSION line: just version numbers,
-# otherwise runapp.sh cannot parsed it
+# otherwise runapp.sh cannot parse it.
 ARG ZANATA_VERSION=3.9.1
 
 # Fedora Containers Packaging may need this
