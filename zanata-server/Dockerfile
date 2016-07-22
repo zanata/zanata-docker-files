@@ -3,6 +3,7 @@ MAINTAINER "Ding-Yi Chen" <dchen@redhat.com>
 
 EXPOSE 8080
 # Version should be assigned in build time
+# This value is also used in runapp.sh, so only version numbers
 ARG ZANATA_VERSION=3.9.1
 
 # Fedora Containers Packaging may need this
