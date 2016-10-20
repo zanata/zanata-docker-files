@@ -1,0 +1,148 @@
+#!/bin/bash -eu
+### NAME
+###     image-make - create, tag and push docker image
+###
+### SYNOPSIS
+###     image-make [Options] <DockerfileDir>
+###
+### DESCRIPTION
+###     This program builds, tag, and push docker images for
+### different propose, for examples, build-env, PR test, and so on.
+###
+### ARGUMENTS
+###     <DockerfileDir>: Directory that contains Dockerfile
+###
+### OPTIONS
+###     -h: Show detail help.
+###     -p: Also push the image
+###     -t: docker image tags. Can specify multiple time for multiple tags.
+###         E.g. -t 'latest' -t '3.9.6'
+###         Default tag is 'latest'
+###
+### ENVIRONMENT
+###     ZANATA_DOCKER_PUSH_REGISTRY: Docker registry for pushing
+###         Note that you should configure /etc/sysconfig/docker to add
+###         the registry.
+###         Default: docker.io
+: ${ZANATA_DOCKER_PUSH_REGISTRY:=docker.io}
+
+###
+shopt -s globstar
+ScriptDir=$(dirname $(readlink  -q -f $0))
+ProgramName=$(basename $0)
+
+##=== function definition Start ===
+###
+### EXIT_STATUS
+###     Success:
+###         EXIT_OK
+declare EXIT_OK=0
+
+###
+###     Fatal that should stop immediately:
+###         EXIT_FATAL_UNSPECIFIED: Unspecified fatal error,
+###             usually indicate a bug in our scripts.
+declare EXIT_FATAL_UNSPECIFIED=1
+
+###         EXIT_FATAL_INVALID_OPTIONS: Wrong options were given
+declare EXIT_FATAL_INVALID_OPTIONS=3
+
+###         EXIT_FATAL_MISSING_DEPENDENCY: Cannot find dependency
+declare EXIT_FATAL_MISSING_DEPENDENCY=4
+
+###         EXIT_FATAL_UNKNOWN_MODULE: Invalid or unknown module name.
+declare EXIT_FATAL_UNKNOWN_MODULE=5
+
+###         EXIT_FATAL_FAIL: Script detected that a fatal error occurred.
+declare EXIT_FATAL_FAIL=6
+
+###
+###     Error that need to stop before next stage:
+###         EXIT_ERROR_FAIL: Script detected that an error occurred.
+declare EXIT_ERROR_FAIL=20
+
+###     Return value, should not print error messages:
+###         EXIT_RETURN_FALSE: Script should return false
+declare EXIT_RETURN_FALSE=40
+
+function echo_stderr(){
+    echo "$@" > /dev/stderr
+}
+
+function zanata_help_raw(){
+    local script="$1"
+    [ -z "$script" ] && script=$0
+    sed -r -n -e '/^### ?/ {s|^### ?||p}' $script
+}
+
+##=== parsing Start ===
+declare -a TagArray=()
+declare -a ExtraOptionArray=()
+RepoName=zanata
+IsPush=0
+
+while getopts "ht:p" opt;do
+    case $opt in
+	h )
+	    zanata_help_raw $0
+	    exit ${EXIT_OK}
+	    ;;
+	t )
+	    TagArray+=( ${OPTARG} )
+	    ;;
+	p )
+	    IsPush=1
+	    ;;
+	* )
+	    failed ${EXIT_FATAL_INVALID_OPTIONS} "$opt"
+	    ;;
+    esac
+done
+shift $((OPTIND-1))
+if [ -z "${TagArray-}" ];then
+    TagArray=( latest )
+fi
+
+## Parse DockerfileDir
+DockerfileDir=${ProgramName##*image-make}
+if [ -z "$DockerfileDir" ];then
+    DockerfileDir=${1-}
+else
+    DockerfileDir=${DockerfileDir#-}
+fi
+
+if [ -z "$DockerfileDir" ];then
+    echo_stderr "[FATAL] <DockerfileDir> not specified"
+    echo_stderr "Use '$0 -h' for help"
+    exit $EXIT_FATAL_INVALID_OPTIONS
+fi
+
+DockerName=$(basename ${DockerfileDir%/})
+case $DockerName in
+    zanata-server )
+	DockerName=server
+	;;
+esac
+
+##=== make Start ===
+BuiltImage=
+
+for tag in "${TagArray[@]}";do
+    Image=$RepoName/$DockerName:$tag
+    echo "Image $Image"
+    if [ -z "$BuiltImage" ];then
+	set -x
+        docker build -t $Image $DockerfileDir
+	set +x
+	BuiltImage=$Image
+    fi
+    set -x
+    docker tag $BuiltImage $ZANATA_DOCKER_PUSH_REGISTRY/$Image
+    set +x
+    if [ $IsPush -eq 1 ];then
+	set -x
+	docker push $ZANATA_DOCKER_PUSH_REGISTRY/$Image
+	set +x
+    fi
+done
+

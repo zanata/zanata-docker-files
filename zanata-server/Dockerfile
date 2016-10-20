@@ -5,7 +5,7 @@ EXPOSE 8080
 # Version should be assigned in build time
 # Take care editing the ZANATA_VERSION line: just version numbers,
 # otherwise runapp.sh cannot parse it.
-ARG ZANATA_VERSION=3.9.5
+ARG ZANATA_VERSION=3.9.6
 
 # Fedora Containers Packaging may need this
 LABEL Name="zanata-server"\
@@ -29,3 +29,8 @@ RUN wget --no-verbose -O /opt/jboss/wildfly/standalone/deployments/zanata.war \
 USER jboss
 
 ADD conf/standalone.xml /opt/jboss/wildfly/standalone/configuration/
+
+# Wildfly should have its own volume, 
+# otherwise data volume masks the WAR and configuration update.
+VOLUME /opt/jboss/wildfly
+
