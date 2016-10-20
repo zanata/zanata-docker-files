@@ -1,8 +1,11 @@
 #!/bin/bash -eu
 ScriptDir=$(dirname $(readlink -f $0))
+
 if [ -n "${ZANATA_VERSION-}" ];then
+    ## Use the version from set environment ZANATA_VERSION
     ZanataVer=$ZANATA_VERSION
 else
+    ## Use the ZANATA_VERSION from Dockerfile, line "ARG ZANATA_VERSION="
     ZanataVer=$(sed -r -n -e '/^ARG\s+ZANATA_VERSION/ s/^ARG\s+ZANATA_VERSION\s*=\s*(.*)\s*/\1/p' < $ScriptDir/Dockerfile)
 fi
 
@@ -11,7 +14,7 @@ DockerOptArray=(--name zanata --volumes-from zanatadb -v zanatadb:/opt/jboss --l
 
 ## If specified ZANATA_DAEMON_MODE=1, it runs Zanata as daemon,
 ## Otherwise it will remove the container after program exit.
-if [ -n "${ZANATA_DAEMON_MODE-}" ];then
+if [ "${ZANATA_DAEMON_MODE-}" = "1" ];then
     DockerOptArray+=( -d )
 else
     DockerOptArray+=( --rm  -it )
