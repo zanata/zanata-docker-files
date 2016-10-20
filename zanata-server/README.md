@@ -30,7 +30,7 @@ Override them to suit your needs.
 * `ZANATA_MYSQL_USER`: Zanata uses this username to access database in MariaDB. (Default: `zanata`)
 * `ZANATA_MYSQL_PASSWORD`: Zanata uses this password to access database in MariaDB. (Default: `password`)
 * `ZANATA_PORT`: Zanata listens on this port on the host. (Default: `8080`)
-* `ZANATA_DAEMON_MODE`: If `1`, the Zanata is run as daemon, otherwise, it runs in frontend and print log to console. (Default: <empty> )
+* `ZANATA_DAEMON_MODE`: If `1`, the Zanata is run as daemon, otherwise, it runs in the foreground and prints its log directly to the console. (Default: empty )
 * `ZANATA_VERSION`: Zanata version to be run. If not specified, it uses the `ZANATA_VERSION` specified in `Dockerfile`.
 
 ## Run Zanata as docker container
@@ -39,7 +39,7 @@ To run Zanata as docker container, simply run:
 ./runapp.sh
 ```
 
-It will not only start the Zanata, but also invokes data and database (MariaDB or MySQL) containers if they are not already running.
+If the data containers are not running, this will start the data containers as well.
 See `rundb.sh` for the invocation detail.
 
 
@@ -54,7 +54,7 @@ $ DB_IP=$(docker inspect ---format '{{range .NetworkSettings.Networks}}{{.IPAddr
 $ mysql --protocol=tcp -h $DB_IP -u zanata -p zanata < conf/admin-user-setup.sql
 ```
 
-where `DB_IP` is IP address of `zanatadb`. You do need to type the Zanata Maridb password
+where `DB_IP` is IP address of `zanatadb`. You will need to type the Zanata Maridb password
 (defined in `ZANATA_MYSQL_PASSWORD`, default is `password`).
 
 ## Access Zanata
