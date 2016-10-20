@@ -1,4 +1,4 @@
-FROM jboss/wildfly:10.0.0.Final
+FROM jboss/wildfly:10.1.0.Final
 MAINTAINER "Ding-Yi Chen" <dchen@redhat.com>
 
 EXPOSE 8080
