@@ -57,6 +57,14 @@ $ mysql --protocol=tcp -h $DB_IP -u zanata -p zanata < conf/admin-user-setup.sql
 where `DB_IP` is IP address of `zanatadb`. You will need to type the Zanata Maridb password
 (defined in `ZANATA_MYSQL_PASSWORD`, default is `password`).
 
+This won't work if you haven't installed mysql localy and the zanatadb port isn't exposed.
+To run the script alternatively direct inside of the container please first copy the admin-user-setup.sql file to the container and then run mysql inside of the container:
+
+```sh
+$ docker cp conf/admin-user-setup.sql zanatadb:/tmp
+$ docker exec -it zanatadb bash -c "mysql -u zanata --password=password zanata < /tmp/admin-user-setup.sql"
+```
+
 ## Access Zanata
 Open a browser and head to `http://HOST:PORT/zanata`, where `PORT` is the port specified in `ZANATA_HOST_PORT` (default `8080`), and `HOST` is the docker host's address (this might be `localhost` or some other IP address if running on OSX for example).
 
