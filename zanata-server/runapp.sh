@@ -6,11 +6,16 @@ if [ -n "${ZANATA_VERSION-}" ];then
     ZanataVer=$ZANATA_VERSION
 else
     ## Use the ZANATA_VERSION from Dockerfile, line "ARG ZANATA_VERSION="
-    ZanataVer=$(sed -r -n -e '/^ARG\s+ZANATA_VERSION/ s/^ARG\s+ZANATA_VERSION\s*=\s*(.*)\s*/\1/p' < $ScriptDir/Dockerfile)
+    ZanataVer=latest
+fi
+
+## Create zanata-files volume if it is missing
+if ! (docker volume ls -q | grep zanata-files) ; then
+    docker volume create --name zanata-files
 fi
 
 : ${ZANATA_PORT:=8080}
-DockerOptArray=(--name zanata --volumes-from zanatadb -v zanatadb:/opt/jboss --link zanatadb:db -p $ZANATA_PORT:8080)
+DockerOptArray=(--name zanata -v zanata-files:/var/lib/zanata -e ZANATA_HOME=/var/lib/zanata --link zanatadb:db -p $ZANATA_PORT:8080)
 
 ## If specified ZANATA_DAEMON_MODE=1, it runs Zanata as daemon,
 ## Otherwise it will remove the container after program exit.
