@@ -5,9 +5,11 @@ if [ -n "${ZANATA_VERSION-}" ];then
     ## Use the version from set environment ZANATA_VERSION
     ZanataVer=$ZANATA_VERSION
 else
-    ## Use the ZANATA_VERSION from Dockerfile, line "ARG ZANATA_VERSION="
+    ## Use the latest version (not necessarily the version defined in the Dockerfile)
     ZanataVer=latest
 fi
+
+echo "Preparing container for Zanata ($ZanataVer)"
 
 ## Create zanata-files volume if it is missing
 if ! (docker volume ls -q | grep zanata-files) ; then
