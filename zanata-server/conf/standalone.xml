@@ -34,9 +34,8 @@
     </extensions>
 
     <system-properties>
-        <property name="javamelody.storage-directory" value="${user.home}/zanata/stats"/>
-        <property name="hibernate.search.default.indexBase" value="${user.home}/zanata/indexes"/>
-        <property name="ehcache.disk.store.dir" value="${user.home}/zanata/ehcache"/>
+        <property name="javamelody.storage-directory" value="${env.ZANATA_HOME:/var/lib/zanata}/stats"/>
+        <property name="hibernate.search.default.indexBase" value="${env.ZANATA_HOME:/var/lib/zanata}/indexes"/>
         <property name="jboss.as.management.blocking.timeout" value="1000"/>
     </system-properties>
 
@@ -454,7 +453,7 @@
                 <simple name="java:global/zanata/email/default-from-address"
                   value="no-reply@zanata.org" />
                 <simple name="java:global/zanata/files/document-storage-directory"
-                  value="${user.home}/zanata/files" />
+                  value="${env.ZANATA_HOME:/var/lib/zanata}/files" />
                 <lookup name="java:jboss/exported/zanata/files/document-storage-directory"
                   lookup="java:global/zanata/files/document-storage-directory"/>
             </bindings>
