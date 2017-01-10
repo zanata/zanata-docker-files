@@ -24,7 +24,7 @@ RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/mysql-connector-java.ja
 
 # Zanata war
 RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/zanata.war \
-	https://github.com/zanata/zanata-platform/releases/download/platform-${ZANATA_VERSION}/zanata-war-${ZANATA_VERSION}.war \
+    https://github.com/zanata/zanata-platform/releases/download/platform-${ZANATA_VERSION}/zanata-war-${ZANATA_VERSION}.war \
     && chmod o+rw /opt/jboss/wildfly/standalone/deployments/zanata.war
 
 ADD conf/standalone.xml /opt/jboss/wildfly/standalone/configuration/
