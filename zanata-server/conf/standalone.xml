@@ -37,6 +37,11 @@
         <property name="javamelody.storage-directory" value="${env.ZANATA_HOME:/var/lib/zanata}/stats"/>
         <property name="hibernate.search.default.indexBase" value="${env.ZANATA_HOME:/var/lib/zanata}/indexes"/>
         <property name="jboss.as.management.blocking.timeout" value="1000"/>
+        <property name="zanata.security.authpolicy.internal" value="zanata.internal"/>
+        <property name="zanata.security.authpolicy.openid" value="zanata.openid"/>
+        <!--<property name="zanata.security.adminusers" value=""/>-->
+        <property name="zanata.email.defaultfromaddress" value="no-reply@zanata.org"/>
+        <property name="zanata.file.directory" value="${env.ZANATA_HOME:/var/lib/zanata}/files"/>
     </system-properties>
 
 
@@ -207,6 +212,12 @@
                     <statement>
                         <track-statements>NOWARN</track-statements>
                     </statement>
+                    <validation>
+                        <validate-on-match>true</validate-on-match>
+                        <background-validation>false</background-validation>
+                        <valid-connection-checker class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLValidConnectionChecker"></valid-connection-checker>
+                        <exception-sorter class-name="org.jboss.jca.adapters.jdbc.extensions.mysql.MySQLExceptionSorter"></exception-sorter>
+                    </validation>
                 </datasource>
                 <datasource jndi-name="java:jboss/datasources/ExampleDS"
                   pool-name="ExampleDS" enabled="true" use-java-context="true">
@@ -446,16 +457,6 @@
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
             <bindings>
-                <simple name="java:global/zanata/security/auth-policy-names/internal" value="zanata.internal" />
-                <simple name="java:global/zanata/security/auth-policy-names/openid" value="zanata.openid" />
-                <!-- Enable to automatically grant admin role to the specified user names -->
-                <!--<simple name="java:global/zanata/security/admin-users" value="" />-->
-                <simple name="java:global/zanata/email/default-from-address"
-                  value="no-reply@zanata.org" />
-                <simple name="java:global/zanata/files/document-storage-directory"
-                  value="${env.ZANATA_HOME:/var/lib/zanata}/files" />
-                <lookup name="java:jboss/exported/zanata/files/document-storage-directory"
-                  lookup="java:global/zanata/files/document-storage-directory"/>
             </bindings>
             <remote-naming />
         </subsystem>
