@@ -18,6 +18,12 @@ ENV ZANATA_HOME /var/lib/zanata
 RUN mkdir -p $ZANATA_HOME && chown -R jboss.jboss $ZANATA_HOME
 VOLUME $ZANATA_HOME
 
+# Make the image Openshift compatible by granting root group (not user) access to the necessary directories
+RUN chgrp -R 0 $ZANATA_HOME /opt/jboss/wildfly
+RUN chmod -R g+rw $ZANATA_HOME /opt/jboss/wildfly
+RUN find $ZANATA_HOME -type d -exec chmod g+x {} +
+RUN find /opt/jboss/wildfly -type d -exec chmod g+x {} +
+
 USER jboss
 
 RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.25/mysql-connector-java-5.1.25.jar
