@@ -15,8 +15,8 @@
 ### OPTIONS
 ###     -h: Show detail help.
 ###     -p: Also push the image
-###     -t: docker image tags. Can specify multiple time for multiple tags.
-###         E.g. -t 'latest' -t '3.9.6'
+###     -t: docker image tags. Can specify multiple times for multiple tags.
+###         E.g. -t 'latest' -t '4.0.0' -t '4.0.0-1'
 ###         Default tag is 'latest'
 ###
 ### ENVIRONMENT
@@ -83,19 +83,19 @@ IsPush=0
 
 while getopts "ht:p" opt;do
     case $opt in
-	h )
-	    zanata_help_raw $0
-	    exit ${EXIT_OK}
-	    ;;
-	t )
-	    TagArray+=( ${OPTARG} )
-	    ;;
-	p )
-	    IsPush=1
-	    ;;
-	* )
-	    failed ${EXIT_FATAL_INVALID_OPTIONS} "$opt"
-	    ;;
+        h )
+            zanata_help_raw $0
+            exit ${EXIT_OK}
+            ;;
+        t )
+            TagArray+=( ${OPTARG} )
+            ;;
+        p )
+            IsPush=1
+            ;;
+        * )
+            failed ${EXIT_FATAL_INVALID_OPTIONS} "$opt"
+            ;;
     esac
 done
 shift $((OPTIND-1))
@@ -120,8 +120,8 @@ fi
 DockerName=$(basename ${DockerfileDir%/})
 case $DockerName in
     zanata-server )
-	DockerName=server
-	;;
+        DockerName=server
+        ;;
 esac
 
 ##=== make Start ===
@@ -131,18 +131,18 @@ for tag in "${TagArray[@]}";do
     Image=$RepoName/$DockerName:$tag
     echo "Image $Image"
     if [ -z "$BuiltImage" ];then
-	set -x
+        set -x
         docker build -t $Image $DockerfileDir
-	set +x
-	BuiltImage=$Image
+        set +x
+        BuiltImage=$Image
     fi
     set -x
     docker tag $BuiltImage $ZANATA_DOCKER_PUSH_REGISTRY/$Image
     set +x
     if [ $IsPush -eq 1 ];then
-	set -x
-	docker push $ZANATA_DOCKER_PUSH_REGISTRY/$Image
-	set +x
+        set -x
+        docker push $ZANATA_DOCKER_PUSH_REGISTRY/$Image
+        set +x
     fi
 done
 
