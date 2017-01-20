@@ -6,8 +6,11 @@
 ###     image-make [Options] <DockerfileDir>
 ###
 ### DESCRIPTION
-###     This program builds, tag, and push docker images for
-### different propose, for examples, build-env, PR test, and so on.
+###     This program builds, tag, and push docker images to docker registry.
+###
+### Note that this program assumes you are already have an docker registry
+### account and login in from the command line at your workstation.
+### Refer README.md for instruction.
 ###
 ### ARGUMENTS
 ###     <DockerfileDir>: Directory that contains Dockerfile
