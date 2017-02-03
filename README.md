@@ -10,8 +10,7 @@ account.
 
 ### Login to docker hub Account
 If you do not have a Docker Hub account, register at
-https://hub.docker.com/ then ask the Zanata team members to add you to Zanata
- team.
+https://hub.docker.com/ then ask the Zanata team members to add you.
 
 You also need to login from the command line at your workstation,
 so you can push the image to Docker Hub.
