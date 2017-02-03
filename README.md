@@ -32,9 +32,7 @@ To release a zanata-server docker image, run:
 ./image-make -t latest -t <version> -p zanata-server
 ```
 
-For example, run the following when release 4.0.1 is the latest, and push to 
-Docker
-Hub:
+For example, run the following when release 4.0.1 is the latest, and push to Docker Hub:
 ```
 ./image-make -t latest -t 4.0.1 -p zanata-server
 ```
@@ -46,9 +44,7 @@ for another platform release, then add '-1' after the version:
 ./image-make -t latest -t 4.0.1-1 -p zanata-server
 ```
 
-If you need to change the Dockerfile again, then bump the sub version to -2, 
-and so
-on.
+If you need to change the Dockerfile again, then bump the sub version to -2, and so on.
 
 
 _Note: These images are provided on a best-effort basis. Pull requests are most welcome_
