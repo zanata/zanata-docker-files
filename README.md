@@ -3,18 +3,18 @@
 Docker images for Zanata project.
 
 ## Release Docker Image
-Release docker image includes build, tag, and push the docker images.
-In order to be able to perform above tasks, you need to login to an docker
+The task to release a docker image includes the following steps: build, 
+tag, and push.
+In order to be able to perform the above, you need to log in to a Docker
 account.
 
 ### Login to docker hub Account
-If you do not have a docker hub account, register one at:
-https://hub.docker.com/
-
-and ask the Zanata team members to add you to Zanata team.
+If you do not have a Docker Hub account, register at
+https://hub.docker.com/ then ask the Zanata team members to add you to Zanata
+ team.
 
 You also need to login from the command line at your workstation,
-so you can push the image to docker hub.
+so you can push the image to Docker Hub.
 Run the following command and enter the docker registry username and
 password:
 
@@ -24,29 +24,31 @@ docker login docker.io
 
 ### Make Image
 
-The program `./image-make` releases the docker images to docker hub.
+The program `./image-make` releases the docker images to Docker Hub.
 
-Run `./image-make -h` for the usage.
+Run `./image-make -h` for usage.
 
-For releasing a zanata-server docker image, run:
+To release a zanata-server docker image, run:
 ```sh
 ./image-make -t latest -t <version> -p zanata-server
 ```
 
-For example, run the following when release 4.0.1 as latest, and push to docker
-hub:
+For example, run the following when release 4.0.1 is the latest, and push to 
+Docker
+Hub:
 ```
 ./image-make -t latest -t 4.0.1 -p zanata-server
 ```
 
-If you find yourself need to change the Dockerfile, but you don't want to wait
-for another platform release, then add '-1' after the version, like
+If you need to change the Dockerfile, but you don't want to wait
+for another platform release, then add '-1' after the version:
 
 ```
 ./image-make -t latest -t 4.0.1-1 -p zanata-server
 ```
 
-If you need to change Dockerfile again, then bump the sub version to -2, and so
+If you need to change the Dockerfile again, then bump the sub version to -2, 
+and so
 on.
 
 
