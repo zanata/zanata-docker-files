@@ -15,7 +15,7 @@ if [ -z $(docker ps -aq -f name=zanatadb) ];then
     docker run --name zanatadb \
         -e MYSQL_USER=${ZANATA_MYSQL_USER} -e MYSQL_PASSWORD=${ZANATA_MYSQL_PASSWORD} \
         -e MYSQL_DATABASE=${ZANATA_MYSQL_DATABASE} -e MYSQL_RANDOM_ROOT_PASSWORD=yes \
-        -v zanata-db:/var/lib/mysql:z \
+        -v zanata-db:/var/lib/mysql:Z \
         -d mariadb:10.1 \
         --character-set-server=utf8 --collation-server=utf8_general_ci
 elif [ -n $(docker ps -aq -f name=zanatadb -f status=exited) ];then

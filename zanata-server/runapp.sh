@@ -1,5 +1,5 @@
 #!/bin/bash -eu
-ScriptDir=$(dirname $(readlink -f $0))
+ScriptDir=$(dirname $(realpath $0))
 
 if [ -n "${ZANATA_VERSION-}" ];then
     ## Use the version from set environment ZANATA_VERSION
