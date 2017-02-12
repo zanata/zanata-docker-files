@@ -5,7 +5,7 @@ EXPOSE 8080
 # Version should be assigned in build time
 # Take care editing the ZANATA_VERSION line: just version numbers,
 # otherwise runapp.sh cannot parse it.
-ARG ZANATA_VERSION=4.0.0
+ARG ZANATA_VERSION=4.1.0
 
 # Fedora Containers Packaging may need this
 LABEL Name="zanata-platform"\
