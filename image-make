@@ -18,6 +18,8 @@
 ### OPTIONS
 ###     -h: Show detail help.
 ###     -p: Also push the image
+###     -l: Also tag the image as latest
+###         Short cut of -t latest
 ###     -t: docker image tags. Can specify multiple times for multiple tags.
 ###         E.g. -t 'latest' -t '4.0.0' -t '4.0.0-1'
 ###         Default tag is 'latest'
@@ -84,12 +86,15 @@ declare -a ExtraOptionArray=()
 RepoName=zanata
 IsPush=0
 
-while getopts "ht:p" opt;do
+while getopts "hlpt:" opt;do
     case $opt in
         h )
             zanata_help_raw $0
             exit ${EXIT_OK}
             ;;
+	l )
+	    TagArray+=( latest )
+	    ;;
         t )
             TagArray+=( ${OPTARG} )
             ;;
