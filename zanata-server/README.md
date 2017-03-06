@@ -50,7 +50,7 @@ At this point, you have a running Zanata instance... with no users created (!)
 To create an admin user, you can connect to the database server and run the script at `conf/admin-user-setup.sql` like this:
 
 ```sh
-$ DB_IP=$(docker inspect ---format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' zanatadb)
+$ DB_IP=$(docker inspect --format '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' zanatadb)
 $ mysql --protocol=tcp -h $DB_IP -u zanata -p zanata < conf/admin-user-setup.sql
 ```
 
