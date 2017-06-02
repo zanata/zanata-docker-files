@@ -3,7 +3,7 @@
 Docker images for Zanata project.
 
 ## Release Docker Image
-The task to release a docker image includes the following steps: build, 
+The task to release a docker image includes the following steps: build,
 tag, and push.
 In order to be able to perform the above, you need to log in to a Docker
 account.
@@ -32,16 +32,16 @@ To release a zanata-server docker image, run:
 ./image-make -t latest -t <version> -p zanata-server
 ```
 
-For example, run the following when release 4.0.1 is the latest, and push to Docker Hub:
+For example, run the following when release 4.2.1 is the latest, and push to Docker Hub:
 ```
-./image-make -t latest -t 4.0.1 -p zanata-server
+./image-make -t latest -t 4.2.1 -p zanata-server
 ```
 
 If you need to change the Dockerfile, but you don't want to wait
 for another platform release, then add '-1' after the version:
 
 ```
-./image-make -t latest -t 4.0.1-1 -p zanata-server
+./image-make -t latest -t 4.2.1-1 -p zanata-server
 ```
 
 If you need to change the Dockerfile again, then bump the sub version to -2, and so on.

@@ -12,12 +12,12 @@ Skip to next section if you just want to use Zanata.
 
 To build the latest released Zanata server, run the following command:
 ```sh
-$ docker build -t zanata/server . 
+$ docker build -t zanata/server .
 ```
 
 You can also specify the version you want to build. For example, you can build version 3.9.5 with the following command:
 ```sh
-$ docker build -t zanata/server:3.9.5 --build-arg=ZANATA_VERSION=3.9.5 . 
+$ docker build -t zanata/server:4.2.1 --build-arg=ZANATA_VERSION=4.2.1 .
 ```
 
 Note that for older versions, you may need to edit `standalone.xml` to make Zanata work.

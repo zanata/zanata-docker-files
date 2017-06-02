@@ -5,7 +5,8 @@ EXPOSE 8080
 # Version should be assigned in build time
 # Take care editing the ZANATA_VERSION line: just version numbers,
 # otherwise runapp.sh cannot parse it.
-ARG ZANATA_VERSION=4.1.0
+ARG ZANATA_VERSION=4.2.1
+ARG MYSQL_CONNECTOR_JAVA_VERSION=5.1.26
 
 # Fedora Containers Packaging may need this
 LABEL Name="zanata-platform"\
@@ -26,7 +27,7 @@ RUN find /opt/jboss/wildfly -type d -exec chmod g+x {} +
 
 USER jboss
 
-RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/5.1.25/mysql-connector-java-5.1.25.jar
+RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_CONNECTOR_JAVA_VERSION}/mysql-connector-java-${MYSQL_CONNECTOR_JAVA_VERSION}.jar
 
 # Zanata war
 RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/zanata.war \
