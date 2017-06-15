@@ -15,7 +15,7 @@ To build the latest released Zanata server, run the following command:
 $ docker build -t zanata/server .
 ```
 
-You can also specify the version you want to build. For example, you can build version 3.9.5 with the following command:
+You can also specify the version you want to build. For example, you can build version 4.2.1 with the following command:
 ```sh
 $ docker build -t zanata/server:4.2.1 --build-arg=ZANATA_VERSION=4.2.1 .
 ```
@@ -26,12 +26,13 @@ Note that for older versions, you may need to edit `standalone.xml` to make Zana
 These environment variables are used in the helper scripts.
 Override them to suit your needs.
 
+* `ZANATA_DOCKER_NETWORK`: docker network that Zanata containers belong. (Default: `docker-network`)
 * `ZANATA_MYSQL_DATABASE`: Zanata uses this database name in MariaDB. (Default: `zanata`)
 * `ZANATA_MYSQL_USER`: Zanata uses this username to access database in MariaDB. (Default: `zanata`)
 * `ZANATA_MYSQL_PASSWORD`: Zanata uses this password to access database in MariaDB. (Default: `password`)
 * `ZANATA_PORT`: Zanata listens on this port on the host. (Default: `8080`)
 * `ZANATA_DAEMON_MODE`: If `1`, the Zanata is run as daemon, otherwise, it runs in the foreground and prints its log directly to the console. (Default: empty )
-* `ZANATA_VERSION`: Zanata version to be run. If not specified, it uses the `ZANATA_VERSION` specified in `Dockerfile`.
+* `ZANATA_VERSION`: Zanata docker version to be run. (Default: `latest`)
 
 ## Run Zanata as docker container
 To run Zanata as docker container, simply run:
