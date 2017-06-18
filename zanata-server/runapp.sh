@@ -7,7 +7,7 @@ source $ScriptDir/common
 # JBoss ports
 : ${ZANATA_PORT:=8080}
 : ${ZANATA_DEBUG_PORT:=8787}
-: ${ZANATA_MGMT_PORT=9090}
+: ${ZANATA_MGMT_PORT:=9990}
 
 # default mail setting
 : ${ZANATA_MAIL_HOST:=$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+')}
@@ -102,6 +102,7 @@ DockerOptArray+=( --name zanata
    -e DB_HOSTNAME=zanatadb \
    -e MAIL_HOST="${ZANATA_MAIL_HOST}" \
    -e ZANATA_HOME=/var/lib/zanata \
+   -e ZANATA_MGMT=${ZANATA_MGMT_PORT} \
    --link zanatadb:db \
    --net ${ZANATA_DOCKER_NETWORK} \
    -p ${ZANATA_PORT}:8080 \

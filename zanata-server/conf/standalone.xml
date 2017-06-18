@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 
-<server xmlns="urn:jboss:domain:4.0">
+<server xmlns="urn:jboss:domain:4.1">
 
     <extensions>
         <extension module="org.jboss.as.clustering.infinispan" />
@@ -34,14 +34,16 @@
     </extensions>
 
     <system-properties>
-        <property name="javamelody.storage-directory" value="${env.ZANATA_HOME:/var/lib/zanata}/stats"/>
-        <property name="hibernate.search.default.indexBase" value="${env.ZANATA_HOME:/var/lib/zanata}/indexes"/>
-        <property name="jboss.as.management.blocking.timeout" value="1000"/>
-        <property name="zanata.security.authpolicy.internal" value="zanata.internal"/>
-        <property name="zanata.security.authpolicy.openid" value="zanata.openid"/>
+        <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
+        <property name="hibernate.search.default.indexBase" value="${env.ZANATA_HOME:/var/lib/zanata}/indexes" />
+        <property name="javamelody.storage-directory" value="${env.ZANATA_HOME:/var/lib/zanata}/stats" />
+        <property name="jboss.as.management.blocking.timeout" value="1000" />
+        <property name="zanata.security.authpolicy.internal" value="zanata.internal" />
+        <property name="zanata.security.authpolicy.openid" value="zanata.openid" />
         <!--<property name="zanata.security.adminusers" value=""/>-->
-        <property name="zanata.email.defaultfromaddress" value="no-reply@zanata.org"/>
-        <property name="zanata.file.directory" value="${env.ZANATA_HOME:/var/lib/zanata}/files"/>
+        <property name="zanata.email.defaultfromaddress" value="no-reply@zanata.org" />
+        <property name="zanata.file.directory" value="${env.ZANATA_HOME:/var/lib/zanata}/files" />
+        <property name="zanata.support.oauth" value="true" />
     </system-properties>
 
 
@@ -133,8 +135,14 @@
             <logger category="org.jboss.as.config">
                 <level name="DEBUG" />
             </logger>
-            <!-- Disable some startup warnings triggered by third-party jars -->
+            <logger category="org.jboss.security.auth.spi.AbstractServerLoginModule">
+                <level name="TRACE"/>
+            </logger>
+            <logger category="io.undertow.security">
+                <level name="TRACE"/>
+            </logger>
             <logger category="org.jboss.as.server.deployment">
+                <level name="INFO"/>
                 <filter-spec value="not(any( match(&quot;JBAS015960&quot;), match(&quot;JBAS015893&quot;) ))"/>
             </logger>
             <!-- Disable WARN about GWT's org.hibernate.validator.ValidationMessages -->
@@ -147,6 +155,7 @@
             </logger>
             <!-- Disable WARN: "JMS API was found on the classpath..." -->
             <logger category="org.richfaces.log.Application">
+                <level name="INFO"/>
                 <filter-spec value="not( match(&quot;JMS API was found on the classpath&quot;) )"/>
             </logger>
             <!-- Disable WARN: "Queue with name '...' has already been registered" -->
@@ -164,7 +173,8 @@
                 <level name="WARN" />
             </logger>
             <logger category="jacorb.config">
-                <level name="ERROR" />
+                <level name="DEBUG" />
+                <filter-spec value="any(match(&quot;.*Catching.*&quot;), levelRange[INFO, FATAL])" />
             </logger>
             <root-logger>
                 <level name="INFO" />
@@ -275,7 +285,8 @@
                 <stateless>
                     <bean-instance-pool-ref pool-name="slsb-strict-max-pool"/>
                 </stateless>
-                <singleton default-access-timeout="5000" />
+                <stateful default-access-timeout="5000" cache-ref="simple" passivation-disabled-cache-ref="simple"/>
+                <singleton default-access-timeout="5000"/>
             </session-bean>
             <mdb>
                 <resource-adapter-ref
@@ -456,8 +467,6 @@
             </server>
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:naming:2.0">
-            <bindings>
-            </bindings>
             <remote-naming />
         </subsystem>
         <subsystem xmlns="urn:jboss:domain:pojo:1.0" />
@@ -547,7 +556,7 @@
             <recovery-environment socket-binding="txn-recovery-environment"
               status-socket-binding="txn-status-manager" />
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:undertow:3.0">
+        <subsystem xmlns="urn:jboss:domain:undertow:3.1">
             <buffer-cache name="default" />
             <server name="default-server">
                 <http-listener name="default" redirect-socket="https"
@@ -584,7 +593,7 @@
             </endpoint-config>
             <client-config name="Standard-Client-Config" />
         </subsystem>
-        <subsystem xmlns="urn:jboss:domain:weld:2.0"/>
+        <subsystem xmlns="urn:jboss:domain:weld:3.0"/>
     </profile>
 
     <interfaces>
@@ -601,14 +610,14 @@
 
     <socket-binding-group name="standard-sockets" default-interface="public"
       port-offset="${jboss.socket.binding.port-offset:0}">
-        <socket-binding name="management-http" interface="management"
-          port="${jboss.management.http.port:9990}" />
+        <socket-binding name="management-http" interface="management"          port="${env.ZANATA_MGMT_PORT:9990}" />
         <socket-binding name="management-https" interface="management"
           port="${jboss.management.https.port:9993}" />
+        <socket-binding name="management-native" interface="management" port="${jboss.management.native.port:9999}"/>
         <socket-binding name="ajp"
           port="${jboss.ajp.port:8009}" />
         <socket-binding name="http"
-          port="${jboss.http.port:8080}" />
+          port="${env.ZANATA_PORT:8080}" />
         <socket-binding name="https"
           port="${jboss.https.port:8443}" />
         <!--
