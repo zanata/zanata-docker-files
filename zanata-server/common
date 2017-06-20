@@ -1,0 +1,20 @@
+# default settings for the scripts
+
+# default database settings value
+: ${ZANATA_MYSQL_DATABASE:=zanata}
+: ${ZANATA_MYSQL_USER:=zanata}
+: ${ZANATA_MYSQL_PASSWORD:=password}
+
+# default docker network to join
+: ${ZANATA_DOCKER_NETWORK:=zanata-network}
+
+function ensure_docker_network() {
+    # check if the docker network is already created
+    if docker network ls | grep -w ${ZANATA_DOCKER_NETWORK}
+    then
+        echo "will use docker network $ZANATA_DOCKER_NETWORK"
+    else
+        echo "creating docker network $ZANATA_DOCKER_NETWORK"
+        docker network create ${ZANATA_DOCKER_NETWORK}
+    fi
+}
