@@ -129,9 +129,6 @@
                 <level name="DEBUG" />
             </logger>
             <logger category="org.jboss.as.config">
-                <level name="DEBUG" />
-            </logger>
-            <logger category="org.jboss.security.auth.spi.AbstractServerLoginModule">
                 <level name="TRACE"/>
             </logger>
             <logger category="org.jboss.as.server.deployment">
@@ -164,6 +161,9 @@
             </logger>
             <logger category="jacorb">
                 <level name="WARN" />
+            </logger>
+            <logger category="jacorb.config">
+                <filter-spec value="any(match(&quot;.*Catching.*&quot;), levelRange[INFO, FATAL])" />
             </logger>
             <root-logger>
                 <level name="INFO" />
