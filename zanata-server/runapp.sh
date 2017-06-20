@@ -9,9 +9,6 @@ source $ScriptDir/common
 : ${ZANATA_DEBUG_PORT:=8787}
 : ${ZANATA_MGMT_PORT:=9990}
 
-# default mail setting
-: ${ZANATA_MAIL_HOST:=localhost}
-
 # misc
 JBOSS_DEPLOYMENT_VOLUME=/opt/jboss/wildfly/standalone/deployments/
 
@@ -78,6 +75,12 @@ while getopts "e:p:n:hl:" opt; do
             ;;
     esac
 done
+
+## Checking Variables
+if [[ -z ${ZANATA_MAIL_HOST:-} ]];then
+    echo "[ERROR] Undefined mail host. Use Option -e <mailHost> or environment variable ZANATA_MAIL_HOST=<mailHost>" > /dev/stderr
+    exit 1
+fi
 
 ensure_docker_network
 

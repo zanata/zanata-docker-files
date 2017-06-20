@@ -33,7 +33,6 @@
     </extensions>
 
     <system-properties>
-        <property name="hibernate.dialect" value="org.hibernate.dialect.MySQL5InnoDBDialect" />
         <property name="hibernate.search.default.indexBase" value="${env.ZANATA_HOME:/var/lib/zanata}/indexes" />
         <property name="javamelody.storage-directory" value="${env.ZANATA_HOME:/var/lib/zanata}/stats" />
         <property name="jboss.as.management.blocking.timeout" value="1000" />
@@ -42,7 +41,6 @@
         <!--<property name="zanata.security.adminusers" value=""/>-->
         <property name="zanata.email.defaultfromaddress" value="no-reply@zanata.org" />
         <property name="zanata.file.directory" value="${env.ZANATA_HOME:/var/lib/zanata}/files" />
-        <property name="zanata.support.oauth" value="true" />
     </system-properties>
 
     <management>
@@ -136,9 +134,6 @@
             <logger category="org.jboss.security.auth.spi.AbstractServerLoginModule">
                 <level name="TRACE"/>
             </logger>
-            <logger category="io.undertow.security">
-                <level name="TRACE"/>
-            </logger>
             <logger category="org.jboss.as.server.deployment">
                 <level name="INFO"/>
                 <filter-spec value="not(any( match(&quot;JBAS015960&quot;), match(&quot;JBAS015893&quot;) ))"/>
@@ -169,10 +164,6 @@
             </logger>
             <logger category="jacorb">
                 <level name="WARN" />
-            </logger>
-            <logger category="jacorb.config">
-                <level name="DEBUG" />
-                <filter-spec value="any(match(&quot;.*Catching.*&quot;), levelRange[INFO, FATAL])" />
             </logger>
             <root-logger>
                 <level name="INFO" />

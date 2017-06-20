@@ -6,7 +6,7 @@
 : ${ZANATA_MYSQL_PASSWORD:=password}
 
 # default docker network to join
-: ${ZANATA_DOCKER_NETWORK:=docker-network}
+: ${ZANATA_DOCKER_NETWORK:=zanata-network}
 
 function ensure_docker_network() {
     # check if the docker network is already created
