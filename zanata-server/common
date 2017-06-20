@@ -1,9 +1,9 @@
 # default settings for the scripts
 
 # default database settings value
+: ${ZANATA_MYSQL_DATABASE:=zanata}
 : ${ZANATA_MYSQL_USER:=zanata}
 : ${ZANATA_MYSQL_PASSWORD:=password}
-: ${ZANATA_MYSQL_DATABASE:=zanata}
 
 # default docker network to join
 : ${ZANATA_DOCKER_NETWORK:=docker-network}

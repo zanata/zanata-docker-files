@@ -10,7 +10,7 @@ source $ScriptDir/common
 : ${ZANATA_MGMT_PORT:=9990}
 
 # default mail setting
-: ${ZANATA_MAIL_HOST:=$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+')}
+: ${ZANATA_MAIL_HOST:=localhost}
 
 # misc
 JBOSS_DEPLOYMENT_VOLUME=/opt/jboss/wildfly/standalone/deployments/
@@ -95,19 +95,16 @@ if ! (docker volume ls -q | grep zanata-files) ; then
 fi
 
 DockerOptArray+=( --name zanata
-   -e DB_ENV_MYSQL_USER="${ZANATA_MYSQL_USER}" \
-   -e DB_ENV_MYSQL_PASSWORD="${ZANATA_MYSQL_PASSWORD}" \
-   -e DB_ENV_MYSQL_DATABASE="${ZANATA_MYSQL_DATABASE}" \
-   -e DB_PORT_3306_TCP_ADDR="$ZanataDbHost" \
-   -e DB_HOSTNAME=zanatadb \
+   -e DB_USERNAME="${ZANATA_MYSQL_USER}" \
+   -e DB_PASSWORD="${ZANATA_MYSQL_PASSWORD}" \
+   -e DB_SCHEMA="${ZANATA_MYSQL_DATABASE}" \
+   -e DB_HOSTNAME="$ZanataDbHost" \
    -e MAIL_HOST="${ZANATA_MAIL_HOST}" \
    -e ZANATA_HOME=/var/lib/zanata \
    -e ZANATA_MGMT=${ZANATA_MGMT_PORT} \
-   --link zanatadb:db \
    --net ${ZANATA_DOCKER_NETWORK} \
    -p ${ZANATA_PORT}:8080 \
    -p ${ZANATA_DEBUG_PORT}:8787 \
-   -p ${ZANATA_MGMT_PORT}:9090 \
    -v zanata-files:/var/lib/zanata:Z \
    )
 
