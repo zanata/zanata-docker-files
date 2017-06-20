@@ -119,18 +119,6 @@
             <logger category="com.arjuna">
                 <level name="WARN" />
             </logger>
-            <!-- JDBC connection allocation/release will be logged to server.log -->
-            <logger
-                category="org.hibernate.engine.jdbc.internal.LogicalConnectionImpl">
-                <level name="DEBUG" />
-            </logger>
-            <!-- More info about JDBC connections will be logged to server.log -->
-            <logger category="org.hibernate.engine.jdbc.internal.JdbcCoordinatorImpl">
-                <level name="DEBUG" />
-            </logger>
-            <logger category="org.jboss.as.config">
-                <level name="TRACE"/>
-            </logger>
             <logger category="org.jboss.as.server.deployment">
                 <level name="INFO"/>
                 <filter-spec value="not(any( match(&quot;JBAS015960&quot;), match(&quot;JBAS015893&quot;) ))"/>
@@ -163,7 +151,7 @@
                 <level name="WARN" />
             </logger>
             <logger category="jacorb.config">
-                <filter-spec value="any(match(&quot;.*Catching.*&quot;), levelRange[INFO, FATAL])" />
+                <level name="ERROR" />
             </logger>
             <root-logger>
                 <level name="INFO" />
