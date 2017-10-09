@@ -18,9 +18,23 @@
 ### OPTIONS
 ###     -h: Show detail help.
 ###     -p: Also push the image
+###     -r <tag>: Release docker image as zanata/<DockerRepoName>:<tag>
+###         For normal release, just put version number. e.g. '4.3.0'
+###         If you change Dockerfile after a released version, put the
+###         sequence number after version, e.g. '4.3.0-1'
+###
+###         This does following:
+###         1. Update ZANATA_VERSION in Dockerfile.
+###            (Sequence number will NOT be included)
+###         2. Make a commit to zanata-docker-file
+###            with message: '[release] Image zanata/<DockerRepoName>:<version> is released'
+###            Note that this commit will NOT be pushed to zanata-docker-file automatically.
+###         3. Build and tag a imag as zanata/<DockerRepoName>:<tag>
+###         4. Push the image to DockerHub
+###
 ###     -t: docker image tags. Can specify multiple times for multiple tags.
 ###         E.g. -t 'latest' -t '4.0.0' -t '4.0.0-1'
-###         Default tag is 'latest'
+###         If no other tag, the image is tag as 'latest'
 ###
 ### ENVIRONMENT
 ###     ZANATA_DOCKER_PUSH_REGISTRY: Docker registry for pushing
@@ -82,9 +96,12 @@ function zanata_help_raw(){
 declare -a TagArray=()
 declare -a ExtraOptionArray=()
 RepoName=zanata
+ReleaseMode=0
 IsPush=0
+ImageTag=
+Version=
 
-while getopts "ht:p" opt;do
+while getopts "ht:pr:" opt;do
     case $opt in
         h )
             zanata_help_raw $0
@@ -96,36 +113,58 @@ while getopts "ht:p" opt;do
         p )
             IsPush=1
             ;;
+        r )
+            ImageTag=${OPTARG}
+            Version=${ImageTag%%-*}
+            TagArray+=( latest ${ImageTag} )
+            IsPush=1
+            ReleaseMode=1
+            ;;
         * )
             failed ${EXIT_FATAL_INVALID_OPTIONS} "$opt"
             ;;
     esac
 done
 shift $((OPTIND-1))
+
+## Check DockerfileDir
+if [[ -z ${1-} ]];then
+    echo_stderr "[FATAL] <DockerfileDir> not specified"
+    echo_stderr "Use '$0 -h' for help"
+    exit $EXIT_FATAL_INVALID_OPTIONS
+elif [[ ! -r $1 ]];then
+    echo_stderr "[FATAL] Directory $1 is not readable"
+    exit $EXIT_FATAL_INVALID_OPTIONS
+fi
+DockerfileDir=$1
+
 if [ -z "${TagArray-}" ];then
     TagArray=( latest )
 fi
 
-## Parse DockerfileDir
-DockerfileDir=${ProgramName##*image-make}
-if [ -z "$DockerfileDir" ];then
-    DockerfileDir=${1-}
-else
-    DockerfileDir=${DockerfileDir#-}
-fi
-
-if [ -z "$DockerfileDir" ];then
-    echo_stderr "[FATAL] <DockerfileDir> not specified"
-    echo_stderr "Use '$0 -h' for help"
-    exit $EXIT_FATAL_INVALID_OPTIONS
-fi
-
-DockerName=$(basename ${DockerfileDir%/})
-case $DockerName in
+TaskName=$(basename "$DockerfileDir")
+case $TaskName in
     zanata-server )
         DockerName=server
         ;;
 esac
+
+##=== Update Version when releasing
+if [[ $ReleaseMode -eq 1 ]]; then
+    cd $ScriptDir
+
+    ## Does Docker hub already has the tag?
+    tagStr=$(curl -s -S "https://registry.hub.docker.com/v2/repositories/$RepoName/$DockerName/tags/" | jq '.results[] | select(.name == "$ImageTag" )')
+    if [[ -z $tagStr ]];then
+        echo_stderr "Docker hub already has $RepoName/$DockerName:$ImageTag"
+        exit $EXIT_RETURN_FALSE
+    fi
+
+    sed -i -e 's/^ARG ZANATA_VERSION=.*$/ARG ZANATA_VERSION='$Version'/' $DockerfileDir/Dockerfile
+    git commit -a -m "[release] Image zanata/$DockerName:$ImageTag is released"
+    cd -
+fi
+exit 0
 
 ##=== make Start ===
 BuiltImage=
