@@ -154,8 +154,8 @@ if [[ $ReleaseMode -eq 1 ]]; then
     cd $ScriptDir
 
     ## Does Docker hub already has the tag?
-    tagStr=$(curl -s -S "https://registry.hub.docker.com/v2/repositories/$RepoName/$DockerName/tags/" | jq '.results[] | select(.name == "$ImageTag" )')
-    if [[ -z $tagStr ]];then
+    tagStr=$(curl -s -S "https://registry.hub.docker.com/v2/repositories/$RepoName/$DockerName/tags/" | jq '.results[] | select(.name == "'$ImageTag'" )')
+    if [[ -n $tagStr ]];then
         echo_stderr "Docker hub already has $RepoName/$DockerName:$ImageTag"
         exit $EXIT_RETURN_FALSE
     fi
@@ -164,7 +164,6 @@ if [[ $ReleaseMode -eq 1 ]]; then
     git commit -a -m "[release] Image zanata/$DockerName:$ImageTag is released"
     cd -
 fi
-exit 0
 
 ##=== make Start ===
 BuiltImage=
