@@ -29,12 +29,12 @@
 ###         2. Make a commit to zanata-docker-file
 ###            with message: '[release] Image zanata/<DockerRepoName>:<version> is released'
 ###            Note that this commit will NOT be pushed to zanata-docker-file automatically.
-###         3. Build and tag a imag as zanata/<DockerRepoName>:<tag>
+###         3. Build and tag the image as zanata/<DockerRepoName>:<tag>
 ###         4. Push the image to DockerHub
 ###
 ###     -t: docker image tags. Can specify multiple times for multiple tags.
 ###         E.g. -t 'latest' -t '4.0.0' -t '4.0.0-1'
-###         If no other tag, the image is tag as 'latest'
+###         If no other tags are specified, the image is tagged as 'latest'
 ###
 ### ENVIRONMENT
 ###     ZANATA_DOCKER_PUSH_REGISTRY: Docker registry for pushing

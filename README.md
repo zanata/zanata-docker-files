@@ -34,28 +34,28 @@ https://hub.docker.com/ then ask other Zanata team members to add you.
 You also need to login from the command line at your workstation,
 so you can push the image to Docker Hub.
 
-Run the following command and enter the docker registry username and  password:
+Run the following command and enter the docker registry username and password:
 ```sh
 docker login docker.io
 ```
 
 ### Update Dockerfile
-If you only need to change the version, no need to change the Dockerfile,
+If you only need to change the version, no need to change the Dockerfile manually,
 `image-make` takes care of this.
 
 If you do need to change more than version, remember in next step,
-you need to append sub version '-1' after the version. For example,
+you need to append sequence number '-1' after the version. For example,
 if you change Dockerfile after version 4.3.0, then you need to tag
 the image as `4.3.0-1`.
 
-If you need to change the Dockerfile again, then bump the sub version to -2, and so on.
+If you need to change the Dockerfile again, then bump the sequence number to -2, and so on.
 
 ### Release Image to DockerHub
 Script `image-make` with option `-r` releases image to DockerHub. For example,
 to release zanata-server `4.3.0-1`, run:
 
 ```sh
-./image-make -r 4.3.0-1 zanata-sercer
+./image-make -r 4.3.0-1 zanata-server
 ```
 
 See the in-line help for the actual behavior of `./image-make -r` by running:
