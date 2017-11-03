@@ -1,24 +1,125 @@
-#!/bin/bash -eu
+#!/bin/bash
 ### NAME
 ###     image-make - create, tag and push docker image
 ###
 ### SYNOPSIS
-###     image-make [Options] <DockerfileDir>
+###     image-make [Options] <DockerName>
 ###
 ### DESCRIPTION
-###     This program builds, tag, and push docker images to docker registry.
+###     This program builds, tag, and push docker images to docker registry as:
+### zanata/<DockerName>:<tag>
 ###
-### Note that this script assumes that you already have an docker registry
+### The <DockerName> can be any of sub-directories of this project that
+### contains a Dockerfile.
+###
+### Specify <tag> with -t <tag>.
+### If -t <tag> is not specified, default <tag> is 'latest'
+### Note that for DockerName "centos-repo-builder", beside just tag as <tag>,
+### you also get <DistroVersion>-<tag>. For example, specified 'by default, you get
+### following tags for centos-repo-builder:
+###
+###     latest, 7-latest, 6-latest
+###
+### Note that centos-repo-builder:7 means centos-repo-builder:7-latest, and
+### centos-repo-builder:6 is also similar.
+###
+### Also note that this script assumes that you already have an docker registry
 ### account and have logged in from the command line at your workstation.
 ### Refer README.md for instruction.
 ###
 ### ARGUMENTS
-###     <DockerfileDir>: Directory that contains Dockerfile
+###     <DockerName>: Name of the docker to be build
 ###
+### ENVIRONMENT
+###     ZANATA_DOCKER_PUSH_REGISTRY: Docker registry for pushing
+###         Note that you should configure /etc/sysconfig/docker to add
+###         the registry.
+###         Default: docker.io
+: ${ZANATA_DOCKER_PUSH_REGISTRY:=docker.io}
+set -eu
+
+###
+shopt -s globstar
+ScriptDir=$(dirname $(readlink  -q -f $0))
+ProgramName=$(basename $0)
+
+##=== function definition Start ===
+## Get EXIT_STATUS and other environment variables from zanata-scripts
+source <(curl -q https://raw.githubusercontent.com/zanata/zanata-scripts/master/zanata-env.sh)
+
+echo_stderr(){
+    echo "$@" > /dev/stderr
+}
+
+zanata_help_raw(){
+    local script="$1"
+    [ -z "$script" ] && script=$0
+    sed -r -n -e '/^### ?/ {s|^### ?||p}' $script
+}
+
+## run_command <command> [args ... ]
+##     On Dry-run mode, just show the command,
+##     otherwise run the command.
+run_command(){
+    if [[ ${DryRunMode:-} -eq 1 ]];then
+        ExitCode=$EXIT_OK
+    else
+        set -x
+        "$@"
+        ExitCode=$?
+        set +x
+    fi
+}
+
+docker_tag_image(){
+    local image=$1
+    local dockerName=$2
+    local tag=$3
+
+    if [[ $image != $RepoName/$dockerName:$tag ]] ;then
+        run_command docker tag $image $RepoName/$dockerName:$tag
+    fi
+    run_command docker tag $image $ZANATA_DOCKER_PUSH_REGISTRY/$RepoName/$dockerName:$tag
+}
+
+CENTOS_VERSION_ARRAY=( 7 6)
+CENTOS_VERSION_DEFAULT=7
+##=== parsing Start ===
+declare -a TagArray=()
+declare -a ExtraOptionArray=()
+DockerfileSource=
+RepoName=zanata
+ReleaseMode=0
+BuildOptions=
+IsPush=0
+ImageTag=
+Version=
+
 ### OPTIONS
+while getopts "hb:t:pr:" opt;do
+    case $opt in
 ###     -h: Show detail help.
+        h )
+            zanata_help_raw $0
+            exit ${EXIT_OK}
+            ;;
+###     -b: docker build options
+###         e.g. -b '--build-arg CENTOS_VERSION=6'
+        b )
+            BuildOptions=${OPTARG}
+            ;;
+###     -t: docker image tags. Can specify multiple times for multiple tags.
+###         E.g. -t 'latest' -t '4.0.0' -t '4.0.0-1'
+###         If no other tags are specified, the image is tagged as 'latest'
+        t )
+            TagArray+=( ${OPTARG} )
+            ;;
 ###     -p: Also push the image
-###     -r <tag>: Release docker image as zanata/<DockerRepoName>:<tag>
+        p )
+            IsPush=1
+            ;;
+###
+###     -r <tag>: Release docker image as zanata/<DockerName>:<tag>
 ###         For normal release, just put version number. e.g. '4.3.0'
 ###         If you change Dockerfile after a released version, put the
 ###         sequence number after version, e.g. '4.3.0-1'
@@ -27,92 +128,10 @@
 ###         1. Update ZANATA_VERSION in Dockerfile.
 ###            (Sequence number will NOT be included)
 ###         2. Make a commit to zanata-docker-file
-###            with message: '[release] Image zanata/<DockerRepoName>:<version> is released'
+###            with message: '[release] Image zanata/<DockerName>:<version> is released'
 ###            Note that this commit will NOT be pushed to zanata-docker-file automatically.
 ###         3. Build and tag the image as zanata/<DockerRepoName>:<tag>
 ###         4. Push the image to DockerHub
-###
-###     -t: docker image tags. Can specify multiple times for multiple tags.
-###         E.g. -t 'latest' -t '4.0.0' -t '4.0.0-1'
-###         If no other tags are specified, the image is tagged as 'latest'
-###
-### ENVIRONMENT
-###     ZANATA_DOCKER_PUSH_REGISTRY: Docker registry for pushing
-###         Note that you should configure /etc/sysconfig/docker to add
-###         the registry.
-###         Default: docker.io
-: ${ZANATA_DOCKER_PUSH_REGISTRY:=docker.io}
-
-###
-shopt -s globstar
-ScriptDir=$(dirname $(readlink  -q -f $0))
-ProgramName=$(basename $0)
-
-##=== function definition Start ===
-###
-### EXIT_STATUS
-###     Success:
-###         EXIT_OK
-declare EXIT_OK=0
-
-###
-###     Fatal that should stop immediately:
-###         EXIT_FATAL_UNSPECIFIED: Unspecified fatal error,
-###             usually indicate a bug in our scripts.
-declare EXIT_FATAL_UNSPECIFIED=1
-
-###         EXIT_FATAL_INVALID_OPTIONS: Wrong options were given
-declare EXIT_FATAL_INVALID_OPTIONS=3
-
-###         EXIT_FATAL_MISSING_DEPENDENCY: Cannot find dependency
-declare EXIT_FATAL_MISSING_DEPENDENCY=4
-
-###         EXIT_FATAL_UNKNOWN_MODULE: Invalid or unknown module name.
-declare EXIT_FATAL_UNKNOWN_MODULE=5
-
-###         EXIT_FATAL_FAIL: Script detected that a fatal error occurred.
-declare EXIT_FATAL_FAIL=6
-
-###
-###     Error that need to stop before next stage:
-###         EXIT_ERROR_FAIL: Script detected that an error occurred.
-declare EXIT_ERROR_FAIL=20
-
-###     Return value, should not print error messages:
-###         EXIT_RETURN_FALSE: Script should return false
-declare EXIT_RETURN_FALSE=40
-
-function echo_stderr(){
-    echo "$@" > /dev/stderr
-}
-
-function zanata_help_raw(){
-    local script="$1"
-    [ -z "$script" ] && script=$0
-    sed -r -n -e '/^### ?/ {s|^### ?||p}' $script
-}
-
-##=== parsing Start ===
-declare -a TagArray=()
-declare -a ExtraOptionArray=()
-RepoName=zanata
-ReleaseMode=0
-IsPush=0
-ImageTag=
-Version=
-
-while getopts "ht:pr:" opt;do
-    case $opt in
-        h )
-            zanata_help_raw $0
-            exit ${EXIT_OK}
-            ;;
-        t )
-            TagArray+=( ${OPTARG} )
-            ;;
-        p )
-            IsPush=1
-            ;;
         r )
             ImageTag=${OPTARG}
             Version=${ImageTag%%-*}
@@ -127,27 +146,35 @@ while getopts "ht:pr:" opt;do
 done
 shift $((OPTIND-1))
 
-## Check DockerfileDir
+## Check DockerName
 if [[ -z ${1-} ]];then
-    echo_stderr "[FATAL] <DockerfileDir> not specified"
+    echo_stderr "[FATAL] <DockerName> not specified"
     echo_stderr "Use '$0 -h' for help"
     exit $EXIT_FATAL_INVALID_OPTIONS
-elif [[ ! -r $1 ]];then
-    echo_stderr "[FATAL] Directory $1 is not readable"
-    exit $EXIT_FATAL_INVALID_OPTIONS
 fi
-DockerfileDir=$1
+DockerName=$1
+
+case $DockerName in
+    server )
+        DockerfileSource=zanata-server
+        ;;
+    centos-repo-builder )
+        ;;
+    * )
+        if [[ ! -r $DockerName/Dockerfile ]]; then
+            echo_stderr "[FATAL] DockerName $DockerName is invalid"
+            exit $EXIT_FATAL_INVALID_OPTIONS
+        fi
+        DockerfileSource=$DockerName
+        ;;
+esac
 
 if [ -z "${TagArray-}" ];then
     TagArray=( latest )
 fi
 
-TaskName=$(basename "$DockerfileDir")
-case $TaskName in
-    zanata-server )
-        DockerName=server
-        ;;
-esac
+## Remove duplicate tags
+TagArray=($(tr ' ' '\n' <<<${TagArray[@]} | sort -u))
 
 ##=== Update Version when releasing
 if [[ $ReleaseMode -eq 1 ]]; then
@@ -160,30 +187,52 @@ if [[ $ReleaseMode -eq 1 ]]; then
         exit $EXIT_RETURN_FALSE
     fi
 
-    sed -i -e 's/^ARG ZANATA_VERSION=.*$/ARG ZANATA_VERSION='$Version'/' $DockerfileDir/Dockerfile
+    sed -i -e 's/^ARG ZANATA_VERSION=.*$/ARG ZANATA_VERSION='$Version'/' $DockerfileSource/Dockerfile
     git commit -a -m "[release] Image zanata/$DockerName:$ImageTag is released"
     cd -
 fi
 
 ##=== make Start ===
-BuiltImage=
-
 for tag in "${TagArray[@]}";do
-    Image=$RepoName/$DockerName:$tag
-    echo "Image $Image"
-    if [ -z "$BuiltImage" ];then
-        set -x
-        docker build -t $Image $DockerfileDir
-        set +x
-        BuiltImage=$Image
-    fi
-    set -x
-    docker tag $BuiltImage $ZANATA_DOCKER_PUSH_REGISTRY/$Image
-    set +x
-    if [ $IsPush -eq 1 ];then
-        set -x
-        docker push $ZANATA_DOCKER_PUSH_REGISTRY/$Image
-        set +x
-    fi
+    case $DockerName in
+        centos-repo-builder )
+            for CENTOS_VERSION in "${CENTOS_VERSION_ARRAY[@]}" ;do
+                Image="$RepoName/$DockerName:$CENTOS_VERSION-$tag"
+                run_command docker build $BuildOptions --build-arg "CENTOS_VERSION=$CENTOS_VERSION" -t $Image - \
+                    <<< $(sed -e "s/@CENTOS_VERSION@/$CENTOS_VERSION/g" $ScriptDir/$DockerName/Dockerfile)
+
+                ## Stage Tag
+                docker_tag_image $Image $DockerName "$CENTOS_VERSION-$tag"
+                if [[ $CENTOS_VERSION = $CENTOS_VERSION_DEFAULT ]];then
+                    docker_tag_image $Image $DockerName $tag
+                fi
+                if [[ $tag = 'latest' ]];then
+                    docker_tag_image $Image $DockerName $CENTOS_VERSION
+                fi
+
+                ## Stage push
+                if [ $IsPush -eq 1 ];then
+                    run_command docker push $ZANATA_DOCKER_PUSH_REGISTRY/$Image
+                    if [[ $CENTOS_VERSION = $CENTOS_VERSION_DEFAULT ]];then
+                        run_command docker push $ZANATA_DOCKER_PUSH_REGISTRY/$DockerName:$tag
+                    fi
+                    if [[ $tag = 'latest' ]];then
+                        run_command docker push $ZANATA_DOCKER_PUSH_REGISTRY/$DockerName:$CENTOS_VERSION
+                    fi
+                fi
+            done
+            ;;
+        * )
+            Image=$RepoName/$DockerName:$tag
+            run_command docker build $BuildOptions -t $Image $DockerfileSource
+            run_command docker tag $Image $ZANATA_DOCKER_PUSH_REGISTRY/$Image
+            if [ $IsPush -eq 1 ];then
+                run_command docker push $ZANATA_DOCKER_PUSH_REGISTRY/$Image
+            fi
+            ;;
+    esac
 done
 
+###
+### EXIT_STATUS
+###    See https://github.com/zanata/zanata-scripts/blob/master/zanata-env.sh

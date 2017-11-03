@@ -1,0 +1,90 @@
+#!/bin/bash
+### NAME
+###     run - run the centos-repo-builder
+###
+### SYNOPSIS
+###     run [Options] <distroVersion> <specFilename> <repoDir> [-b]
+###
+### DESCRIPTION
+###     This program builds RPMs from a given SPEC file and update
+### yum/dnf repodata.
+###
+### <distroVersion> is the CentOS version you like to build from.
+### Like 7 to build from CentOS 7.
+###
+### <specfilename> is the RPM SPEC filename. Currently, the SPEC file
+### need to be in repoDir.
+###
+### <repoDir> is the directory that will host repository data and
+### RPM files. <repoDir> is also a volume for docker.
+###
+
+set -eu
+shopt -s globstar
+ScriptDir=$(dirname $(realpath $0))
+ProgramName=$(basename $0)
+
+##=== function definition Start ===
+## Get EXIT_STATUS and other environment variables from zanata-scripts
+source <(curl -q https://raw.githubusercontent.com/zanata/zanata-scripts/master/zanata-env.sh)
+
+zanata_help_raw(){
+    local script="$1"
+    [ -z "$script" ] && script=$0
+    sed -r -n -e '/^### ?/ {s|^### ?||p}' $script
+}
+##=== function definition End ===
+
+DockerRunOptArray=()
+## Arguments for /home/builder/build
+ArgumentArray=()
+ContainerName=
+
+###
+### Options
+while getopts "hbn:o:r" opt;do
+    case $opt in
+###     -h: Show detail help.
+        h )
+            zanata_help_raw $0
+            exit ${EXIT_OK}
+            ;;
+###     -b: Install build dependencies in docker
+###         It runs sudo yum-builddep <specfile> to install build
+###         dependencies in docker.
+        b )
+            ArgumentArray+=( -b )
+            ;;
+###     -n <name>: Container name
+###         Default: centos<distroVersion>-builder
+        n )
+            ContainerName=$OPTARG
+            ;;
+###     -o <options>: Options for docker-build
+        o )
+            DockerRunOptArray+=( ${OPTARG} )
+            ;;
+###     -r Remove the container after execution
+        r )
+            DockerRunOptArray+=(--rm)
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [[ $# -lt 3 ]]; then
+    zanata_help_raw $0
+    exit ${EXIT_FATAL_INVALID_OPTIONS}
+fi
+
+CentosVersion=$1
+SpecFile=$2
+RepoDir=$(realpath $3)
+shift 3
+[[ -z ${ContainerName} ]] && ContainerName="centos${CentosVersion}-builder"
+
+docker run "${DockerRunOptArray[@]}" -it --name $ContainerName -v $RepoDir:/repo:Z docker.io/zanata/centos-repo-builder:$CentosVersion ${ArgumentArray[@]} $SpecFile $@
+
+###
+### EXIT_STATUS
+###    See https://github.com/zanata/zanata-scripts/blob/master/zanata-env.sh
