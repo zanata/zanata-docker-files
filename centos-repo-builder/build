@@ -1,0 +1,38 @@
+#!/bin/bash
+set -xeu
+if [[ $# -eq 0 ]]; then
+    echo "Usage: $0 [-b] <specfile>"
+    exit 0
+fi
+builddep=0
+while getopts "b" opt;do
+    case $opt in
+        b )
+            builddep=1
+            ;;
+    esac
+done
+shift $((OPTIND-1))
+cd @REPO_DIR@
+spec=$1
+[[ $builddep -eq 1 ]] && sudo /usr/bin/yum-builddep $spec
+spectool -R -g $spec
+rpmbuild -ba $spec
+DistroDir=@REPO_DIR@/epel-@CENTOS_VERSION@
+Nvr=$(rpm -q --qf '%{nvr}' --specfile $spec)
+Arch=$(rpm -q --qf '%{arch}' --specfile $spec)
+if [[ $Arch = "noarch" ]] ;then
+    mv -f $DistroDir/noarch/* $DistroDir/x86_64
+    rm -fr $DistroDir/noarch
+    mkdir -p $DistroDir/i386
+    cd $DistroDir/i386
+    rm -f *.noarch.rpm
+    ln -s ../x86_64/*.noarch.rpm .
+    cd -
+fi
+cd $DistroDir
+for archDir in SRPMS x86_64 i386 ;do 
+    createrepo --update --database --verbose --delta $archDir
+done 
+
+

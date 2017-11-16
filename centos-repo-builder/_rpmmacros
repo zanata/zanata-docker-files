@@ -1,0 +1,9 @@
+%home %(echo $HOME)
+%_smp_mflags  -j3
+%__arch_install_post /usr/lib/rpm/check-rpaths  /usr/lib/rpm/check-buildroot
+%_topdir @RPMBUILD_TOPDIR@
+%_specdir @REPO_DIR@
+%_sourcedir @RPMBUILD_SOURCEDIR@
+%_rpmdir @REPO_DIR@/epel-@CENTOS_VERSION@
+%_srcrpmdir @REPO_DIR@/epel-@CENTOS_VERSION@/SRPMS
+%dist .el@CENTOS_VERSION@
