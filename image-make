@@ -199,7 +199,7 @@ for tag in "${TagArray[@]}";do
             for CENTOS_VERSION in "${CENTOS_VERSION_ARRAY[@]}" ;do
                 Image="$RepoName/$DockerName:$CENTOS_VERSION-$tag"
                 run_command docker build $BuildOptions --build-arg "CENTOS_VERSION=$CENTOS_VERSION" -t $Image - \
-                    <<< $(sed -e "s/@CENTOS_VERSION@/$CENTOS_VERSION/g" $ScriptDir/$DockerName/Dockerfile)
+                    <<< "$(sed -e "s/@CENTOS_VERSION@/$CENTOS_VERSION/g" $ScriptDir/$DockerName/Dockerfile)"
 
                 ## Stage Tag
                 docker_tag_image $Image $DockerName "$CENTOS_VERSION-$tag"
