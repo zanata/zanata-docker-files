@@ -31,7 +31,7 @@ ADD "https://raw.githubusercontent.com/zanata/zanata-docker-files/$BRANCH/centos
 ADD "https://raw.githubusercontent.com/zanata/zanata-docker-files/$BRANCH/centos-repo-builder/build" build
 RUN for v in CENTOS_VERSION REPODIR RPMBUILD_TOPDIR RPMBUILD_SOURCEDIR ; do\
         sed -i -e "s/@$v@/$$v/g" .rpmmacros &&\
-        sed -i -e "s/@$v@/$$v/g" build &&\
+        sed -i -e "s/@$v@/$$v/g" build ;\
     done &&\
     mkdir -p $RPMBUILD_TOPDIR
 
