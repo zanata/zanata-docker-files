@@ -42,7 +42,7 @@ ContainerName=
 
 ###
 ### Options
-while getopts "hbn:o:r" opt;do
+while getopts "hbn:o:rs:" opt;do
     case $opt in
 ###     -h: Show detail help.
         h )
@@ -68,6 +68,10 @@ while getopts "hbn:o:r" opt;do
         r )
             DockerRunOptArray+=(--rm)
             ;;
+###     -s <dir>: Directory for RPM sourcedir
+        s )
+            DockerRunOptArray+=( -v $(realpath $OPTARG):/rpmbuild/SOURCES:Z )
+            ;;
     esac
 done
 shift $((OPTIND-1))
@@ -83,7 +87,7 @@ RepoDir=$(realpath $3)
 shift 3
 [[ -z ${ContainerName} ]] && ContainerName="centos${CentosVersion}-builder"
 
-docker run "${DockerRunOptArray[@]}" -it --name $ContainerName -v $RepoDir:/repo:Z docker.io/zanata/centos-repo-builder:$CentosVersion ${ArgumentArray[@]} $SpecFile $@
+docker run ${DockerRunOptArray[@]:-} -it --name $ContainerName -v $RepoDir:/repo:Z docker.io/zanata/centos-repo-builder:$CentosVersion ${ArgumentArray[@]:-} $SpecFile $@
 
 ###
 ### EXIT_STATUS
