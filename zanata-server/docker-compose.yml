@@ -1,0 +1,35 @@
+version: "2.1"
+services:
+  zanatadb:
+    image: "mariadb:10.1"
+    restart: on-failure
+    container_name: "zanatadb"
+    command: "--character-set-server=utf8 --collation-server=utf8_general_ci"
+    volumes:
+      - zanata-db:/var/lib/mysql:Z
+    environment:
+      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_USER=$ZANATA_MYSQL_USER
+      - MYSQL_PASSWORD=$ZANATA_MYSQL_PASSWORD
+      - MYSQL_DATABASE=$ZANATA_MYSQL_DATABASE
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "--silent"]
+  zanata:
+    image: "zanata/server:$ZANATA_VERSION"
+    container_name: "zanata"
+    ports:
+      - "$ZANATA_PORT:8080"
+    volumes:
+      - zanata-files:/var/lib/zanata
+    depends_on:
+      zanatadb:
+        condition: service_healthy
+    environment:
+      - ZANATA_HOME=/var/lib/zanata
+      - DB_HOSTNAME=zanatadb
+      - DB_SCHEMA=$ZANATA_MYSQL_DATABASE
+      - DB_USERNAME=$ZANATA_MYSQL_USER
+      - DB_PASSWORD=$ZANATA_MYSQL_PASSWORD
+volumes:
+  zanata-files:
+  zanata-db:
