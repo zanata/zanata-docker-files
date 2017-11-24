@@ -36,6 +36,7 @@ Override them to suit your needs.
 * `ZANATA_MYSQL_PASSWORD`: Zanata uses this password to access database in MariaDB. (Default: `password`)
 * `ZANATA_PORT`: Zanata listens on this port on the host. (Default: `8080`)
 * `ZANATA_VERSION`: Zanata docker version to be run. (Default: `latest`)
+* `ZANATA_MAIL_PORT`: SMTP port Zanata will send mails to. (Default: `25`)
 
 
 ## Run Zanata as docker container
