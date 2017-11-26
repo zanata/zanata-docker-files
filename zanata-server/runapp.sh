@@ -103,6 +103,11 @@ DockerOptArray+=( --name zanata
    -e DB_SCHEMA="${ZANATA_MYSQL_DATABASE}" \
    -e DB_HOSTNAME="$ZanataDbHost" \
    -e MAIL_HOST="${ZANATA_MAIL_HOST}" \
+   -e MAIL_PORT="${ZANATA_MAIL_PORT:=25}" \
+   -e MAIL_USERNAME="${ZANATA_MAIL_USERNAME}" \
+   -e MAIL_PASSWORD="${ZANATA_MAIL_PASSWORD}" \
+   -e MAIL_TLS="${ZANATA_MAIL_TLS}" \
+   -e MAIL_SSL="${ZANATA_MAIL_SSL}" \
    -e ZANATA_HOME=/var/lib/zanata \
    -e ZANATA_MGMT=${ZANATA_MGMT_PORT} \
    --net ${ZANATA_DOCKER_NETWORK} \
