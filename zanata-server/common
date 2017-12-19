@@ -1,9 +1,23 @@
 # default settings for the scripts
 
+# JBoss ports
+: ${ZANATA_PORT:=8080}
+: ${ZANATA_DEBUG_PORT:=8787}
+: ${ZANATA_MGMT_PORT:=9990}
+
 # default database settings value
 : ${ZANATA_MYSQL_DATABASE:=zanata}
 : ${ZANATA_MYSQL_USER:=zanata}
 : ${ZANATA_MYSQL_PASSWORD:=password}
+
+# Mail settings
+: ${ZANATA_MAIL_HOST:=localhost}
+: ${ZANATA_MAIL_PORT:=25}
+: ${ZANATA_MAIL_AUTH:=false}
+: ${ZANATA_MAIL_USERNAME:=username}
+: ${ZANATA_MAIL_PASSWORD:=password}
+: ${ZANATA_MAIL_TLS:=false}
+: ${ZANATA_MAIL_SSL:=false}
 
 # default docker network to join
 : ${ZANATA_DOCKER_NETWORK:=zanata-network}
