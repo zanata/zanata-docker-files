@@ -38,7 +38,6 @@ Override them to suit your needs.
 * `ZANATA_VERSION`: Zanata docker version to be run. (Default: `latest`)
 * `ZANATA_MAIL_HOST`: SMTP host Zanata will send mails to. (Default: `localhost`)
 * `ZANATA_MAIL_PORT`: SMTP port Zanata will send mails to. (Default: `25`)
-* `ZANATA_MAIL_AUTH`: If mail authentication is enabled (Default: `false`)
 * `ZANATA_MAIL_USERNAME`: SMTP Username for mail authentication (Default: `username`)
 * `ZANATA_MAIL_PASSWORD`: SMTP Password for mail authentication (Default: `password`)
 * `ZANATA_MAIL_TLS`: Enable TLS transport for SMTP (Default: `false`)

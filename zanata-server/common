@@ -1,4 +1,4 @@
-# default settings for the scripts
+# Default settings and functions for the scripts
 
 # JBoss ports
 : ${ZANATA_PORT:=8080}
@@ -13,9 +13,11 @@
 # Mail settings
 : ${ZANATA_MAIL_HOST:=localhost}
 : ${ZANATA_MAIL_PORT:=25}
-: ${ZANATA_MAIL_AUTH:=false}
-: ${ZANATA_MAIL_USERNAME:=username}
-: ${ZANATA_MAIL_PASSWORD:=password}
+# MAIL_USERNAME and MAIL_PASSWORD can not be empty as they are used in wildfly standalone-full.xml
+# If the smtp server does not require authentication, these single space values will be used
+SINGLE_SPACE=" "
+: "${ZANATA_MAIL_USERNAME:=SINGLE_SPACE}"
+: "${ZANATA_MAIL_PASSWORD:=SINGLE_SPACE}"
 : ${ZANATA_MAIL_TLS:=false}
 : ${ZANATA_MAIL_SSL:=false}
 
