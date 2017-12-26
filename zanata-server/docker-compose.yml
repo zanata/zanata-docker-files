@@ -27,6 +27,7 @@ services:
     environment:
       - ZANATA_HOME=/var/lib/zanata
       - DB_HOSTNAME=zanatadb
+      - DB_PORTNUMBER=3306
       - DB_SCHEMA=$ZANATA_MYSQL_DATABASE
       - DB_USERNAME=$ZANATA_MYSQL_USER
       - DB_PASSWORD=$ZANATA_MYSQL_PASSWORD
