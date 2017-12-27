@@ -30,7 +30,7 @@ Override them to suit your needs.
    If `1`, the Zanata runs as daemon;
    otherwise, it runs in the foreground and prints its log directly to the console. (Default: empty )
 * `ZANATA_DOCKER_NETWORK`: docker network that Zanata containers belong. (Default: `docker-network`)
-* `ZAMATA_MGMT_PORT`: Wildfly management port. (Default: 9990)
+* `ZANATA_MGMT_PORT`: Wildfly management port. (Default: 9990)
 * `ZANATA_MYSQL_DATABASE`: Zanata uses this database name in MariaDB. (Default: `zanata`)
 * `ZANATA_MYSQL_USER`: Zanata uses this username to access database in MariaDB. (Default: `zanata`)
 * `ZANATA_MYSQL_PASSWORD`: Zanata uses this password to access database in MariaDB. (Default: `password`)
