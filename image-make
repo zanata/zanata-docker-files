@@ -93,7 +93,10 @@ ReleaseMode=0
 BuildOptions=
 IsPush=0
 ImageTag=
-Version=
+## BaseVersion is the version without qualifier. e.g. BaseVersion of 4.4.0-alpha-1 is 4.4.0
+BaseVersion=
+## ArtifactVersion is the actual version. e.g. 4.4.0-alpha-1
+ArtifactVersion=
 
 ### OPTIONS
 while getopts "hb:t:pr:" opt;do
@@ -124,6 +127,10 @@ while getopts "hb:t:pr:" opt;do
 ###         If you change Dockerfile after a released version, put the
 ###         sequence number after version, e.g. '4.3.0-1'
 ###
+###         You can also put pre-release tag like 4.4.0-0.alpha-2,
+###         This will download corresponding WAR file (e.g. zanata-war-4.4.0-alpha-2.war)
+###         and make the docker image (e.g. zanata/server:4.4.0-0.alpha-2)
+###
 ###         This does following:
 ###         1. Update ZANATA_VERSION in Dockerfile.
 ###            (Sequence number will NOT be included)
@@ -132,12 +139,27 @@ while getopts "hb:t:pr:" opt;do
 ###            Note that this commit will NOT be pushed to zanata-docker-file automatically.
 ###         3. Build and tag the image as zanata/<DockerRepoName>:<tag>
 ###         4. Push the image to DockerHub
-        r )
+###
+###         You can also put pre-release tag like 4.4.0-alpha-2,
+###         This will download corresponding WAR file (e.g. zanata-war-4.4.0-alpha-2.war)
+###         and make the docker image (e.g. zanata/server:4.4.0-alpha-2)
+###         However, 'latest' won't be tag to pre-release images.
+      	r )
             ImageTag=${OPTARG}
-            Version=${ImageTag%%-*}
-            TagArray+=( latest ${ImageTag} )
+            TagArray+=( ${ImageTag} )
+            BaseVersion=${ImageTag%%-*}
+            Qualifier=$(sed -r -n -e 's/^[^-]*-(.*)$/\1/p'<<<$ImageTag)
+            if [[ $Qualifier == [abrmABRM]* ]]; then
+              ## Cover the pre-release qualifiers such as alpha, beta, rc, milestone
+              ArtifactVersion="$BaseVersion-$Qualifier"
+            else
+              TagArray+=( latest )
+              ArtifactVersion=$BaseVersion
+            fi
             IsPush=1
             ReleaseMode=1
+            echo "ArtifactVersion: $ArtifactVersion" > /dev/stderr
+            echo "TagArray: ${TagArray[@]}" > /dev/stderr
             ;;
         * )
             failed ${EXIT_FATAL_INVALID_OPTIONS} "$opt"
@@ -187,7 +209,7 @@ if [[ $ReleaseMode -eq 1 ]]; then
         exit $EXIT_RETURN_FALSE
     fi
 
-    sed -i -e 's/^ARG ZANATA_VERSION=.*$/ARG ZANATA_VERSION='$Version'/' $DockerfileSource/Dockerfile
+    sed -i -e 's/^ARG ZANATA_VERSION=.*$/ARG ZANATA_VERSION='$ArtifactVersion'/' $DockerfileSource/Dockerfile
     git commit -a -m "[release] Image zanata/$DockerName:$ImageTag is released"
     cd -
 fi
