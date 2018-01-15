@@ -115,7 +115,7 @@ while getopts "hb:it:pr:" opt;do
 ###     -i: Ignore error
 ###         Proceed the task.
         i )
-	    IgnoreError=1
+            IgnoreError=1
             ;;
 ###     -t: docker image tags. Can specify multiple times for multiple tags.
 ###         E.g. -t 'latest' -t '4.0.0' -t '4.0.0-1'
@@ -150,7 +150,7 @@ while getopts "hb:it:pr:" opt;do
 ###         This will download corresponding WAR file (e.g. zanata-war-4.4.0-alpha-2.war)
 ###         and make the docker image (e.g. zanata/server:4.4.0-alpha-2)
 ###         However, 'latest' won't be tag to pre-release images.
-      	r )
+          r )
             ImageTag=${OPTARG}
             TagArray+=( ${ImageTag} )
             BaseVersion=${ImageTag%%-*}
@@ -212,9 +212,9 @@ if [[ $ReleaseMode -eq 1 ]]; then
     tagStr=$(curl -s -S "https://registry.hub.docker.com/v2/repositories/$RepoName/$DockerName/tags/" | jq '.results[] | select(.name == "'$ImageTag'" )')
     if [[ -n $tagStr ]];then
         if [[ $IgnoreError -eq 0 ]];then
-      	    echo_stderr "Docker hub already has $RepoName/$DockerName:$ImageTag"
-    		exit $EXIT_RETURN_FALSE
-    	fi
+            echo_stderr "Docker hub already has $RepoName/$DockerName:$ImageTag"
+            exit $EXIT_RETURN_FALSE
+        fi
     fi
     sed -i -e 's/^ARG ZANATA_VERSION=.*$/ARG ZANATA_VERSION='$ArtifactVersion'/' $DockerfileSource/Dockerfile
     if ! git diff --exit-code; then
