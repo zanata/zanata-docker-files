@@ -93,13 +93,14 @@ ReleaseMode=0
 BuildOptions=
 IsPush=0
 ImageTag=
+IgnoreError=
 ## BaseVersion is the version without qualifier. e.g. BaseVersion of 4.4.0-alpha-1 is 4.4.0
 BaseVersion=
 ## ArtifactVersion is the actual version. e.g. 4.4.0-alpha-1
 ArtifactVersion=
 
 ### OPTIONS
-while getopts "hb:t:pr:" opt;do
+while getopts "hb:it:pr:" opt;do
     case $opt in
 ###     -h: Show detail help.
         h )
@@ -110,6 +111,11 @@ while getopts "hb:t:pr:" opt;do
 ###         e.g. -b '--build-arg CENTOS_VERSION=6'
         b )
             BuildOptions=${OPTARG}
+            ;;
+###     -i: Ignore error
+###         Proceed the task.
+        i )
+	    IgnoreError=1
             ;;
 ###     -t: docker image tags. Can specify multiple times for multiple tags.
 ###         E.g. -t 'latest' -t '4.0.0' -t '4.0.0-1'
@@ -205,12 +211,18 @@ if [[ $ReleaseMode -eq 1 ]]; then
     ## Does Docker hub already has the tag?
     tagStr=$(curl -s -S "https://registry.hub.docker.com/v2/repositories/$RepoName/$DockerName/tags/" | jq '.results[] | select(.name == "'$ImageTag'" )')
     if [[ -n $tagStr ]];then
-        echo_stderr "Docker hub already has $RepoName/$DockerName:$ImageTag"
+        if [[ $IgnoreError -eq 0 ]];then
+      	    echo_stderr "Docker hub already has $RepoName/$DockerName:$ImageTag"
+    		exit $EXIT_RETURN_FALSE
+    	fi
+    fi
+    sed -i -e 's/^ARG ZANATA_VERSION=.*$/ARG ZANATA_VERSION='$ArtifactVersion'/' $DockerfileSource/Dockerfile
+    if ! git diff --exit-code; then
+        git commit -a -m "[release] Image zanata/$DockerName:$ImageTag is released"
+    elif [[ $IgnoreError -eq 0 ]];then
+        echo_stderr "Docker file is already updated"
         exit $EXIT_RETURN_FALSE
     fi
-
-    sed -i -e 's/^ARG ZANATA_VERSION=.*$/ARG ZANATA_VERSION='$ArtifactVersion'/' $DockerfileSource/Dockerfile
-    git commit -a -m "[release] Image zanata/$DockerName:$ImageTag is released"
     cd -
 fi
 
