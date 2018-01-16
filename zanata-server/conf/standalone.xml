@@ -36,11 +36,15 @@
         <property name="hibernate.search.default.indexBase" value="${env.ZANATA_HOME:/var/lib/zanata}/indexes" />
         <property name="javamelody.storage-directory" value="${env.ZANATA_HOME:/var/lib/zanata}/stats" />
         <property name="jboss.as.management.blocking.timeout" value="1000" />
+        <!-- <property name="picketlink.file" value="${env.ZANATA_HOME:/var/lib/zanata}/picketlink.xml" /> -->
+        <!-- <property name="zanata.security.adminusers" value=""/> -->
+        <property name="zanata.email.defaultfromaddress" value="no-reply@zanata.org" />
+        <property name="zanata.home" value="${env.ZANATA_HOME:/var/lib/zanata}" />
+        <property name="zanata.file.directory" value="${env.ZANATA_HOME:/var/lib/zanata}/files" />
         <property name="zanata.security.authpolicy.internal" value="zanata.internal" />
         <property name="zanata.security.authpolicy.openid" value="zanata.openid" />
-        <!--<property name="zanata.security.adminusers" value=""/>-->
-        <property name="zanata.email.defaultfromaddress" value="no-reply@zanata.org" />
-        <property name="zanata.file.directory" value="${env.ZANATA_HOME:/var/lib/zanata}/files" />
+        <!-- <property name="zanata.security.authpolicy.saml2" value="zanata.saml2" /> -->
+        <property name="zanata.support.oauth" value="true" />
     </system-properties>
 
     <management>
