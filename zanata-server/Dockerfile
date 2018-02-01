@@ -5,7 +5,7 @@ EXPOSE 8080
 # Version should be assigned in build time
 # Take care editing the ZANATA_VERSION line: just version numbers,
 # otherwise runapp.sh cannot parse it.
-ARG ZANATA_VERSION=4.4.0
+ARG ZANATA_VERSION=4.4.1
 ARG MYSQL_CONNECTOR_JAVA_VERSION=5.1.26
 
 # MAIL_USERNAME and MAIL_PASSWORD can not be empty as they are used in wildfly standalone-full.xml.
