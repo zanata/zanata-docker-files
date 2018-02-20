@@ -188,7 +188,7 @@
         <subsystem xmlns="urn:jboss:domain:datasources:4.0">
             <datasources>
                 <datasource jndi-name="java:jboss/datasources/zanataDatasource" pool-name="zanataDatasource" enabled="true" use-ccm="true">
-                    <connection-url>jdbc:mysql://${env.DB_HOSTNAME}:3306/${env.DB_SCHEMA}?characterEncoding=UTF-8</connection-url>
+                    <connection-url>jdbc:mysql://${env.DB_HOSTNAME}:${env.DB_PORTNUMBER}/${env.DB_SCHEMA}?characterEncoding=UTF-8</connection-url>
                     <driver-class>com.mysql.jdbc.Driver</driver-class>
                     <driver>mysql-connector-java.jar</driver>
                     <pool>
