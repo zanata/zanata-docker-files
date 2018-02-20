@@ -592,7 +592,7 @@
     <socket-binding-group name="standard-sockets" default-interface="public"
         port-offset="${jboss.socket.binding.port-offset:0}">
         <socket-binding name="management-http" interface="management"
-            port="${jboss.management.http.port:9990}" />
+            port="${env.ZANATA_MGMT:9990}" />
         <socket-binding name="management-https" interface="management"
             port="${jboss.management.https.port:9993}" />
         <socket-binding name="management-native" interface="management"
