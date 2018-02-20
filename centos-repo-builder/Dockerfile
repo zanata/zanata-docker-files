@@ -9,8 +9,8 @@ ARG RPMBUILD_SOURCEDIR="/rpmbuild/SOURCES"
 ## Override this if you want to test zanata-docker-files pull requests
 ARG BRANCH=master
 
-LABEL build="20171116" \
-    description="Build RPMs and create repository for Fedora People repository"
+LABEL build="20180111" \
+    description="Build EPEL RPMs and create repository for Fedora People repository"
 
 ENV EXTRA_PACKAGES="java-1.8.0-openjdk-devel"
 

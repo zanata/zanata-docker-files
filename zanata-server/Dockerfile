@@ -5,8 +5,16 @@ EXPOSE 8080
 # Version should be assigned in build time
 # Take care editing the ZANATA_VERSION line: just version numbers,
 # otherwise runapp.sh cannot parse it.
-ARG ZANATA_VERSION=4.3.1
+ARG ZANATA_VERSION=4.4.3
 ARG MYSQL_CONNECTOR_JAVA_VERSION=5.1.26
+
+# Database Setup
+ENV DB_HOSTNAME zanatadb
+ENV DB_PORTNUMBER 3306
+
+# MAIL_USERNAME and MAIL_PASSWORD can not be empty as they are used in wildfly standalone-full.xml.
+# If the smtp server does not require authentication, these single space values will be used
+ENV MAIL_HOST=localhost MAIL_USERNAME=' ' MAIL_PASSWORD=' '
 
 # Fedora Containers Packaging may need this
 LABEL Name="zanata-platform"\

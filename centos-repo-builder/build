@@ -1,14 +1,18 @@
 #!/bin/bash
 set -xeu
 if [[ $# -eq 0 ]]; then
-    echo "Usage: $0 [-b] <specfile>"
+    echo "Usage: $0 [-bd] <specfile>"
     exit 0
 fi
 builddep=0
-while getopts "b" opt;do
+debug=0
+while getopts "bd" opt;do
     case $opt in
         b )
             builddep=1
+            ;;
+        d )
+            debug=1
             ;;
     esac
 done
@@ -16,6 +20,11 @@ shift $((OPTIND-1))
 cd @REPO_DIR@
 spec=$1
 [[ $builddep -eq 1 ]] && sudo /usr/bin/yum-builddep $spec
+
+if [[ debug -eq 1 ]];then
+    echo "Content of ~/..rpmmacros" > /dev/stderr
+    cat ~/.rpmmacros >  /dev/stderr
+fi
 spectool -R -g $spec
 rpmbuild -ba $spec
 DistroDir=@REPO_DIR@/epel-@CENTOS_VERSION@

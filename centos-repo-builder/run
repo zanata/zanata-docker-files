@@ -42,7 +42,7 @@ ContainerName=
 
 ###
 ### Options
-while getopts "hbn:o:rs:" opt;do
+while getopts "hbdn:o:rs:" opt;do
     case $opt in
 ###     -h: Show detail help.
         h )
@@ -55,18 +55,23 @@ while getopts "hbn:o:rs:" opt;do
         b )
             ArgumentArray+=( -b )
             ;;
-###     -n <name>: Container name
+###     -d: Debug mode
+###         It will list .rpmmacros and some other debug information.
+	d )
+	    ArgumentArray+=( -d )
+	    ;;
+	    ###     -n <name>: Container name
 ###         Default: centos<distroVersion>-builder
         n )
             ContainerName=$OPTARG
             ;;
-###     -o <options>: Options for docker-build
+###     -o <options>: Options for docker-run
         o )
             DockerRunOptArray+=( ${OPTARG} )
             ;;
 ###     -r Remove the container after execution
         r )
-            DockerRunOptArray+=(--rm)
+            DockerRunOptArray+=( --rm )
             ;;
 ###     -s <dir>: Directory for RPM sourcedir
         s )
