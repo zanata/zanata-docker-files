@@ -36,10 +36,17 @@ Override them to suit your needs.
 * `ZANATA_MYSQL_PASSWORD`: Zanata uses this password to access database in MariaDB. (Default: `password`)
 * `ZANATA_PORT`: Zanata listens on this port on the host. (Default: `8080`)
 * `ZANATA_VERSION`: Zanata docker version to be run. (Default: `latest`)
-
+* `ZANATA_MAIL_HOST`: SMTP host Zanata will send mails to. (Default: `localhost`)
+* `ZANATA_MAIL_PORT`: SMTP port Zanata will send mails to. (Default: `25`)
+* `ZANATA_MAIL_USERNAME`: SMTP Username for mail authentication (Default: `username`)
+* `ZANATA_MAIL_PASSWORD`: SMTP Password for mail authentication (Default: `password`)
+* `ZANATA_MAIL_TLS`: Enable TLS transport for SMTP (Default: `false`)
+* `ZANATA_MAIL_SSL`: Enable SSL transport for SMTP (usually used on Port 465) (Default: `false`)
 
 ## Run Zanata as docker container
-To run Zanata as docker container, simply run:
+To run Zanata as docker container, set up your config as environment variables (see above) in a .env file.
+
+Then simply run:
 ```
 ./runapp.sh
 ```

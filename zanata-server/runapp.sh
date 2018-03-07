@@ -4,11 +4,6 @@ ScriptFile=$(realpath ${BASH_SOURCE[0]})
 ScriptDir=$(dirname $ScriptFile)
 source $ScriptDir/common
 
-# JBoss ports
-: ${ZANATA_PORT:=8080}
-: ${ZANATA_DEBUG_PORT:=8787}
-: ${ZANATA_MGMT_PORT:=9990}
-
 # misc
 JBOSS_DEPLOYMENT_VOLUME=/opt/jboss/wildfly/standalone/deployments/
 
@@ -28,13 +23,13 @@ while getopts "e:p:n:hl:" opt; do
             ZANATA_MAIL_HOST=$OPTARG
             ;;
         l)
-            echo "==== provide smtp host login (username:password) ===="
+            echo "==== provide SMTP host login (username:password) ===="
             # set the internal field separator (IFS) variable, and then let it parse into an array.
             # When this happens in a command, then the assignment to IFS only takes place to that single command's environment (to read ).
             # It then parses the input according to the IFS variable value into an array
             IFS=':' read -ra CREDENTIAL <<< "$OPTARG"
             if [ ${#CREDENTIAL[@]} -ne 2 ]; then
-                echo "must provide smtp credentials in username:password format (colon separated)"
+                echo "Must provide SMTP credentials in username:password format (colon separated)"
                 exit 1
             fi
             ZANATA_MAIL_USERNAME=${CREDENTIAL[0]}
@@ -48,9 +43,9 @@ while getopts "e:p:n:hl:" opt; do
                 ZANATA_PORT=$(($OPTARG + 8080))
                 ZANATA_DEBUG_PORT=$(($OPTARG + 8787))
                 ZANATA_MGMT_PORT=$(($OPTARG + 9090))
-                echo "===== Zanata http port : $ZANATA_PORT"
-                echo "===== debug port       : $ZANATA_DEBUG_PORT"
-                echo "===== management port  : $ZANATA_MGMT_PORT"
+                echo "===== Zanata HTTP port : $ZANATA_PORT"
+                echo "===== Debug port       : $ZANATA_DEBUG_PORT"
+                echo "===== Management port  : $ZANATA_MGMT_PORT"
             else
                 echo "===== MUST provide an integer as argument ====="
                 exit 1
@@ -58,14 +53,14 @@ while getopts "e:p:n:hl:" opt; do
             ;;
         n)
             echo "===== set docker network to $OPTARG ====="
-            DOCKER_NETWORK=$OPTARG
+            ZANATA_DOCKER_NETWORK=$OPTARG
             ;;
         h)
             echo "========   HELP   ========="
-            echo "-e <smtp email host>  : smtp mail host"
-            echo "-l <username:password>: smtp login: username and password separated by colon"
+            echo "-e <SMTP email host>  : SMTP mail host"
+            echo "-l <username:password>: SMTP login: username and password separated by colon"
             echo "-p <offset number>    : set JBoss port offset"
-            echo "-n <docker network>   : will connect container to given docker network (default is $DOCKER_NETWORK)"
+            echo "-n <docker network>   : will connect container to given docker network (default is $ZANATA_DOCKER_NETWORK)"
             echo "-h                    : display help"
             exit
             ;;
@@ -84,12 +79,11 @@ fi
 
 ensure_docker_network
 
-
 ## Setup DB container if not running
 if [ -z  $(docker ps -aq -f name=zanatadb -f status=running) ]; then
     $ScriptDir/rundb.sh
 fi
-ZanataDbHost=$(docker inspect  --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' zanatadb)
+ZANATA_DB_HOST=$(docker inspect  --format='{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' zanatadb)
 
 echo "Preparing container for Zanata ($ZanataVer)" > /dev/stderr
 ## Create zanata-files volume if it is missing
@@ -101,8 +95,13 @@ DockerOptArray+=( --name zanata
    -e DB_USERNAME="${ZANATA_MYSQL_USER}" \
    -e DB_PASSWORD="${ZANATA_MYSQL_PASSWORD}" \
    -e DB_SCHEMA="${ZANATA_MYSQL_DATABASE}" \
-   -e DB_HOSTNAME="$ZanataDbHost" \
+   -e DB_HOSTNAME="${ZANATA_DB_HOST}" \
    -e MAIL_HOST="${ZANATA_MAIL_HOST}" \
+   -e MAIL_PORT="${ZANATA_MAIL_PORT}" \
+   -e MAIL_USERNAME="${ZANATA_MAIL_USERNAME:= }" \
+   -e MAIL_PASSWORD="${ZANATA_MAIL_PASSWORD:= }" \
+   -e MAIL_TLS="${ZANATA_MAIL_TLS}" \
+   -e MAIL_SSL="${ZANATA_MAIL_SSL}" \
    -e ZANATA_HOME=/var/lib/zanata \
    -e ZANATA_MGMT=${ZANATA_MGMT_PORT} \
    --net ${ZANATA_DOCKER_NETWORK} \

@@ -9,9 +9,9 @@ services:
       - zanata-db:/var/lib/mysql:Z
     environment:
       - MYSQL_RANDOM_ROOT_PASSWORD=yes
-      - MYSQL_USER=$ZANATA_MYSQL_USER
-      - MYSQL_PASSWORD=$ZANATA_MYSQL_PASSWORD
-      - MYSQL_DATABASE=$ZANATA_MYSQL_DATABASE
+      - MYSQL_USER=${ZANATA_MYSQL_USER}
+      - MYSQL_PASSWORD=${ZANATA_MYSQL_PASSWORD}
+      - MYSQL_DATABASE=${ZANATA_MYSQL_DATABASE}
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "--silent"]
   zanata:
@@ -27,10 +27,16 @@ services:
     environment:
       - ZANATA_HOME=/var/lib/zanata
       - DB_HOSTNAME=zanatadb
+      - DB_SCHEMA=${ZANATA_MYSQL_DATABASE}
+      - DB_USERNAME=${ZANATA_MYSQL_USER}
+      - DB_PASSWORD=${ZANATA_MYSQL_PASSWORD}
       - DB_PORTNUMBER=3306
-      - DB_SCHEMA=$ZANATA_MYSQL_DATABASE
-      - DB_USERNAME=$ZANATA_MYSQL_USER
-      - DB_PASSWORD=$ZANATA_MYSQL_PASSWORD
+      - MAIL_HOST=${ZANATA_MAIL_HOST}
+      - MAIL_PORT=${ZANATA_MAIL_PORT}
+      - MAIL_USERNAME=${ZANATA_MAIL_USERNAME}
+      - MAIL_PASSWORD=${ZANATA_MAIL_PASSWORD}
+      - MAIL_TLS=${ZANATA_MAIL_TLS}
+      - MAIL_SSL=${ZANATA_MAIL_SSL}
 volumes:
   zanata-files:
   zanata-db:
