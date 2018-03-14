@@ -19,7 +19,7 @@ ENV MAIL_HOST=localhost MAIL_USERNAME=' ' MAIL_PASSWORD=' '
 # Fedora Containers Packaging may need this
 LABEL Name="zanata-platform"\
     Version=$ZANATA_VERSION\
-    Release="1"
+    Release="2"
 
 USER root
 
