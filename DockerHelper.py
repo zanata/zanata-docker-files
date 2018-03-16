@@ -71,9 +71,9 @@ def _get_tag_names(docker_name):
     result = [] # type: List[str]
     while tag_url:
         ## Enforce https
-        tag_url_without_protocal = re.sub('^[^:/]+://', '', tag_url)
-        logging.info("Getting tags from https://" + tag_url_without_protocal)
-        response = urllib2.urlopen('https://' + tag_url_without_protocal)
+        tag_url_without_protocol = re.sub('^[^:/]+://', '', tag_url)
+        logging.info("Getting tags from https://" + tag_url_without_protocol)
+        response = urllib2.urlopen('https://' + tag_url_without_protocol)
         logging.debug(response.info())
 
         tags_json = json.load(response)
