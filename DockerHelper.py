@@ -35,6 +35,10 @@ class DockerTag:
         # type: (str) -> str
         return self[key]
 
+## Cmd full path
+GIT_CMD = '/bin/git'
+CURL_CMD = '/bin/curl'
+DOCKER_CMD = '/bin/docker'
 
 ## Exit Status
 EXIT_OK = 0
@@ -68,8 +72,10 @@ def _get_tag_names(docker_name):
     tag_url = 'https://registry.hub.docker.com/v2/repositories/' + args.repo_name + '/' + docker_name + '/tags/'
     result = [] # type: List[str]
     while tag_url:
-        logging.info("Getting tags from " + tag_url)
-        response = urllib2.urlopen(tag_url)
+        ## Enforce https
+        tag_url_without_protocal = re.sub('^[^:/]+://', '', tag_url)
+        logging.info("Getting tags from https://" + tag_url_without_protocal)
+        response = urllib2.urlopen('https://' + tag_url_without_protocal)
         logging.debug(response.info())
 
         tags_json = json.load(response)
@@ -80,7 +86,7 @@ def _get_tag_names(docker_name):
 def get_tags(args):
     # type: (argparse.Namespace) -> None
     """Return the name of tags as list"""
-    logging.info("get-tags for %s/%s" %(args.repo_name,args.docker_name))
+    logging.info("get-tags for %s/%s", args.repo_name, args.docker_name)
 
     tags_list = _get_tag_names(args.docker_name)
     print('\n'.join(str(tag) for tag in tags_list))
@@ -107,11 +113,11 @@ def git_remote_get_latest_tag(repo_url, tag_glob = '*'):
     # type: (str, str) -> str
     tag = subprocess.check_output(
             [
-                'git', 'ls-remote', '--tags',
+                GIT_CMD, 'ls-remote', '--tags',
                 repo_url,
                 'refs/tags/' + tag_glob + '[^^{}]'
             ]).split()[-1].split('/')[-1]
-    logging.info("latest tag of %s is %s" %(repo_url, tag))
+    logging.info("latest tag of %s is %s", repo_url, tag)
     return tag
 
 def git_remote_get_latest_version(repo_url, tag_prefix = None):
@@ -148,10 +154,10 @@ def _dockerfile_update(docker_name, tag):
 
     image_tag = DockerTag(tag)
     release = 1 if not hasattr(image_tag, 'postrelease') else int(image_tag.postrelease)
-    docker_file = _docker_name_to_dir(docker_name) + '/Dockerfile'
+    dockerfile_name = _docker_name_to_dir(docker_name) + '/Dockerfile'
 
-    file = fileinput.FileInput([docker_file], inplace=1, backup='.bak')
-    for line in iter(file):
+    dockerfile_file = fileinput.FileInput([dockerfile_name], inplace=1, backup='.bak')
+    for line in iter(dockerfile_file):
         if re.match(r'^ARG ZANATA_VERSION=.*$', line):
             sys.stdout.write(re.sub(r'^ARG ZANATA_VERSION=.*$',
                     'ARG ZANATA_VERSION=' + image_tag.version, line))
@@ -162,7 +168,7 @@ def _dockerfile_update(docker_name, tag):
             sys.stdout.write(line)
 
     sys.stdout.flush()
-    file.close()
+    dockerfile_file.close()
 
 def docker_tag_determine(args):
     # type: (argparse.Namespace) -> str
@@ -178,41 +184,41 @@ def publish(args):
     # type: (argparse.Namespace) -> None
     """Publish docker image to docker hub, as well as git commit"""
     tag = docker_tag_determine(args)
-    logging.info("docker tag to be publish: %s" % tag)
+    logging.info("docker tag to be publish: %s", tag)
     if _has_tag(args.docker_name, tag):
-        logger.error("Tag %s already exists" % tag)
+        logger.error("Tag %s already exists", tag)
         sys.exit(EXIT_FATAL_INVALID_ARGUMENTS)
 
     ## Update Docker file
     _dockerfile_update(args.docker_name, tag)
     docker_image_name = "%s/%s:%s" % (args.repo_name, args.docker_name, tag)
-    if subprocess.call(['git', 'diff', '--exit-code']) != 0:
+    if subprocess.call([GIT_CMD, 'diff', '--exit-code']) != 0:
         subprocess.check_call([
-                'git', 'commit', '-a', '-m',
+                GIT_CMD, 'commit', '-a', '-m',
                 "[release] Image %s is released" % docker_image_name])
 
     ## Building docker image
-    logging.info("Building image %s" % docker_image_name)
+    logging.info("Building image %s", docker_image_name)
     subprocess.check_call([
-            'docker', 'build', '-t', docker_image_name, _docker_name_to_dir(args.docker_name)])
+            DOCKER_CMD, 'build', '-t', docker_image_name, _docker_name_to_dir(args.docker_name)])
 
     ## Tag docker image
     for t in [ tag, 'latest' ]:
         subprocess.check_call([
-                'docker', 'tag', docker_image_name,
+                DOCKER_CMD, 'tag', docker_image_name,
                 "%s/%s/%s:%s" % (args.registry, args.repo_name, args.docker_name, t)])
 
     ## Pushing docker image
     for t in [ tag, 'latest' ]:
         subprocess.check_call([
-                'docker', 'push',
+                DOCKER_CMD, 'push',
                 "%s/%s/%s:%s" % (args.registry, args.repo_name, args.docker_name, t)])
 
     ## Git push to master if there is unpushed comments
-    if subprocess.call("git", "diff", "--exit-code", "origin", "HEAD") != 0 :
+    if subprocess.call(GIT_CMD, "diff", "--exit-code", "origin", "HEAD") != 0 :
         # git_detached_merge_branch is needed in Jenkins as it checkout as detached
-        subprocess.check_call("curl -q https://raw.githubusercontent.com/zanata/zanata-scripts/master/zanata-functions | bash -s - run git_detached_merge_branch master", shell=True)
-        subprocess.check_call(['git', 'push', 'origin', 'master'])
+        subprocess.check_call(CURL_CMD + "-q https://raw.githubusercontent.com/zanata/zanata-scripts/master/zanata-functions | bash -s - run git_detached_merge_branch master", shell=True)
+        subprocess.check_call([GIT_CMD, 'push', 'origin', 'master'])
 
 if __name__ == '__main__':
     ## Parse options and arguments
