@@ -1,18 +1,22 @@
 #!/usr/bin/env python
+"""Docker Helper functions
+It contains docker tag query functions and Dockerfile update function.
+Run ./DockerHelper --help or ./DockerHelper --help <command> for
+detail help."""
 
-from typing import List, Any
-# We need to import List and Any for mypy to work
+from typing import List, Any  # pylint: disable=unused-import
+# We need to import 'List' and 'Any' for mypy to work
 import argparse
 import fileinput
 import json
 import logging
 import re
-import subprocess
+import subprocess  # nosec
 import sys
 import urllib2
 
 
-class GitHelper:
+class GitHelper(object):
     "Helper functions for git"
     GIT_CMD = '/bin/git'
 
@@ -23,10 +27,10 @@ class GitHelper:
         Known Bug: If the tag 4.4.4 is newer than 4.5.0,
         then the 'latest' tag will be 4.4.4"""
 
-        tag = subprocess.check_output([
-            GitHelper.GIT_CMD, 'ls-remote', '--tags', repo_url,
-            'refs/tags/' + tag_glob + '[^^{}]'
-            ]).split()[-1].split('/')[-1]
+        tag = subprocess.check_output(  # nosec
+            [GitHelper.GIT_CMD, 'ls-remote', '--tags', repo_url,
+                'refs/tags/' + tag_glob + '[^^{}]']
+            ).split()[-1].split('/')[-1]
         logging.info("latest tag of %s is %s", repo_url, tag)
         return tag
 
@@ -35,7 +39,7 @@ class GitHelper:
         # type: () -> str
         """Return either current branch, or 'HEAD' if in detached mode
         This method assume you are already in correct directory"""
-        return subprocess.check_output(
+        return subprocess.check_output(  # nosec
                 [GitHelper.GIT_CMD, 'rev-parse', '--abbrev-ref', 'HEAD'])
 
     @staticmethod
@@ -43,33 +47,32 @@ class GitHelper:
         # type: (str) -> None
         """Merge to target_branch if in git detached mode, or no-op
         This method assume you are already in correct directory"""
-        commit_sha = subprocess.check_output(
+        commit_sha = subprocess.check_output(  # nosec
                 [GitHelper.GIT_CMD, 'rev-parse', 'HEAD'])
         tmp_branch = 'br-' + commit_sha
         if GitHelper.branch_get_current() == 'HEAD':
-            subprocess.check_call(
+            subprocess.check_call(  # nosec
                     [GitHelper.GIT_CMD, 'branch', tmp_branch, commit_sha])
-            subprocess.check_call(
+            subprocess.check_call(  # nosec
                     [GitHelper.GIT_CMD, 'checkout', target_branch])
-            subprocess.check_call(
+            subprocess.check_call(  # nosec
                     [GitHelper.GIT_CMD, 'merge', tmp_branch])
-            subprocess.check_call(
+            subprocess.check_call(   # nosec
                     [GitHelper.GIT_CMD, 'branch', '-D', tmp_branch])
 
     @staticmethod
     def push(target_branch):
         # type: (str) -> None
         "Git push to master if there is unpushed commits"
-        if subprocess.call(
+        if subprocess.call(  # nosec
                 [GitHelper.GIT_CMD, 'diff', '--exit-code', 'origin', 'HEAD']
                 ) != 0:
             # branch_merge_detached is needed in Jenkins
             # as it checkout as detached
             GitHelper.branch_merge_detached(target_branch)
-            subprocess.check_call(
-                    [
-                            GitHelper.GIT_CMD, 'push', '--follow-tags',
-                            'origin', 'master'])
+            subprocess.check_call([  # nosec
+                    GitHelper.GIT_CMD, 'push', '--follow-tags',
+                    'origin', 'master'])
 
     def __init__(self, repo_url, tag_prefix=''):
         # type: (str, str) -> None
@@ -83,10 +86,11 @@ class GitHelper:
         return self[key]
 
 
-class DockerImage:
+class DockerImage(object):
     """This class contains information about Docker image tag and dockerfile
     tag: version-postrelease, version, or simply 'latest'
     dockerfile: path"""
+    # pylint: disable=too-many-instance-attributes
 
     # Cmd full path
     DOCKER_CMD = '/bin/docker'
@@ -141,15 +145,15 @@ class DockerImage:
 
     def __init__(self, repo_name, docker_name, tag_param):
         # type: (str, str, str) -> None
+        # pylint: disable=too-many-instance-attributes
         """Properties:
-            tag_param: The tag parameter, it accepts either  x.y.z-r or 'auto'
-            version: e.g. 4.4.3
-            extra: whatever after [version]-.
-                Could be either the pre-release like alpha-1
-                or post-release like 2
-            prerelesae: e.g. alpha-1
-            postrelease: e.g. 2
-            final_tag: Final resolved tag, like 4.4.3-2"""
+        repo_name: repository name. e.g. 'zanata'
+        docker_name: docker image name. e.g. 'server'
+        tag_param: The tag parameter, it accepts either  x.y.z-r or 'auto'
+        version: e.g. 4.4.3
+        prerelesae: e.g. alpha-1
+        postrelease: e.g. 2
+        final_tag: Final resolved tag, like 4.4.3-2"""
 
         self.repo_name = repo_name
         # Dockerfile
@@ -161,13 +165,27 @@ class DockerImage:
 
         self.dockerfile_name = "%s/Dockerfile" % dockerfile_dir
 
-        # Docker Tag
         self.tag_param = tag_param
-        if self.tag_param == 'latest':
-            self.final_tag = 'latest'
-            return
+        # Docker Tag
+        match = re.match('^([0-9.]+)(-(.*))?', self.tag_param)
+        if match:
+            self.version = match.group(1)
+            extra = match.group(3)
+            if extra:
+                if extra.isdigit():
+                    self.postrelease = int(extra)
+                    self.final_tag = "%s-%d" % (
+                            self.version, self.postrelease)
+                else:
+                    # alpha or rc
+                    self.prerelease = extra
+                    self.final_tag = "%s-%s" % (
+                            self.version, self.prerelease)
+            else:
+                self.final_tag = self.version
+
         elif self.tag_param == 'auto':
-            if args.docker_name in DockerImage.DOCKER_NAME_DB:
+            if self.docker_name in DockerImage.DOCKER_NAME_DB:
                 git_helper = GitHelper(
                         DockerImage.DOCKER_NAME_DB[docker_name]['url'],
                         DockerImage.DOCKER_NAME_DB[docker_name]['tag_prefix'])
@@ -180,20 +198,7 @@ class DockerImage:
                 sys.exit(EXIT_FATAL_INVALID_ARGUMENTS)
             self.final_tag = "%s-%d" % (self.version, self.postrelease)
         else:
-            match = re.search('^([^-]*)-(.*)', self.tag_param)
-            if match:
-                self.version = match.group(1)
-                self.extra = match.group(2)
-                if re.match('^[0-9]+', self.extra):
-                    self.postrelease = int(self.extra)
-                    self.final_tag = "%s-%d" % (self.version, self.postrelease)
-                else:
-                    # alpha or rc
-                    self.prerelease = self.extra
-                    self.final_tag = self.tag_param
-            elif re.match('^[0-9.]+', self.tag_param):
-                self.version = self.tag_param
-                self.final_tag = self.tag_param
+            self.final_tag = self.tag_param
         self.image_name = "%s/%s:%s" % (
                 self.repo_name, self.docker_name, self.final_tag)
 
@@ -203,6 +208,7 @@ class DockerImage:
 
     def dockerfile_update(self):
         # type: () -> None
+        """Update the Dockerfile"""
 
         release = 1 if not hasattr(self, 'postrelease') else int(self.postrelease)
 
@@ -276,28 +282,25 @@ def publish():
     # Update Docker file
     image = DockerImage(args.repo_name, args.docker_name, args.tag)
     image.dockerfile_update()
-    if subprocess.call([GitHelper.GIT_CMD, 'diff', '--exit-code']) != 0:
-        subprocess.check_call([
+    if subprocess.call([GitHelper.GIT_CMD, 'diff', '--exit-code']) != 0:   # nosec
+        subprocess.check_call([  # nosec
                 GitHelper.GIT_CMD, 'commit', '-a', '-m',
                 "[release] Image %s is released" % image.image_name])
 
     # Building docker image
     logging.info("Building image %s", image.image_name)
-    subprocess.check_call([
+    subprocess.check_call([  # nosec
             DockerImage.DOCKER_CMD, 'build',
             '-t', image.image_name, image.dockerfile_name])
 
-    # Tag docker image
+    # Tag and push docker image
     for current_tag in [image.final_tag, 'latest']:
-        subprocess.check_call([
+        subprocess.check_call([  # nosec
                 DockerImage.DOCKER_CMD, 'tag', image.image_name,
                 "%s/%s/%s:%s" % (
                         args.registry, args.repo_name,
                         args.docker_name, current_tag)])
-
-    # Pushing docker image
-    for current_tag in [image.final_tag, 'latest']:
-        subprocess.check_call([
+        subprocess.check_call([  # nosec
                 DockerImage.DOCKER_CMD, 'push',
                 "%s/%s/%s:%s" % (
                         args.registry, args.repo_name,
@@ -307,8 +310,9 @@ def publish():
     GitHelper.push('master')
 
 
-if __name__ == '__main__':
-    # Parse options and arguments
+def parse():
+    # type () -> None
+    """Parse options and arguments"""
     parser = argparse.ArgumentParser(description='Docker helper functions')
     parser.add_argument(
             '-r', '--repo-name', type=str,
@@ -356,10 +360,10 @@ if __name__ == '__main__':
     publish_parser.add_argument(
             'docker_name', type=str,
             help='Docker name, e.g. "server"')
-    publish_parser.add_argument(
-            'tag', type=str,
-            help='tag to be publish')
+    publish_parser.add_argument('tag', type=str, help='tag to be publish')
     publish_parser.set_defaults(func=publish)
+    return parser.parse_args()
 
-    args = parser.parse_args()
+if __name__ == '__main__':
+    args = parse()
     args.func()

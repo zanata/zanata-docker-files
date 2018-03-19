@@ -9,7 +9,6 @@ class DockerImageTestCase(unittest.TestCase):
         self.assertFalse(hasattr(latest_image, 'version'))
         self.assertFalse(hasattr(latest_image, 'prerelease'))
         self.assertFalse(hasattr(latest_image, 'postrelease'))
-        self.assertFalse(hasattr(latest_image, 'extra'))
         self.assertEqual(latest_image.final_tag, 'latest')
         self.assertEqual(latest_image.dockerfile_name, 'zanata-server/Dockerfile')
 
@@ -18,7 +17,6 @@ class DockerImageTestCase(unittest.TestCase):
         self.assertEqual(vanilla_image.version, '4.4.3')
         self.assertFalse(hasattr(vanilla_image, 'prerelease'))
         self.assertFalse(hasattr(vanilla_image, 'postrelease'))
-        self.assertFalse(hasattr(vanilla_image, 'extra'))
         self.assertEqual(vanilla_image.final_tag, '4.4.3')
         self.assertEqual(vanilla_image.dockerfile_name, 'centos-repo-builder/Dockerfile')
 
@@ -27,7 +25,6 @@ class DockerImageTestCase(unittest.TestCase):
         self.assertEqual(postrelease_image.version, '4.4.3')
         self.assertFalse(hasattr(postrelease_image, 'prerelease'))
         self.assertEqual(postrelease_image.postrelease, 2)
-        self.assertEqual(postrelease_image.extra, '2')
         self.assertEqual(postrelease_image.final_tag, '4.4.3-2')
         self.assertEqual(postrelease_image.dockerfile_name, 'fedora-package/Dockerfile')
 
@@ -36,7 +33,6 @@ class DockerImageTestCase(unittest.TestCase):
         self.assertEqual(prerelease_image.version, '4.5.0')
         self.assertEqual(prerelease_image.prerelease, 'alpha-1')
         self.assertFalse(hasattr(prerelease_image, 'postrelease'))
-        self.assertEqual(prerelease_image.extra, 'alpha-1')
         self.assertEqual(prerelease_image.final_tag, '4.5.0-alpha-1')
         self.assertEqual(prerelease_image.dockerfile_name, 'zanata-server/Dockerfile')
 
