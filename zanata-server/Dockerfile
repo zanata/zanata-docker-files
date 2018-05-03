@@ -5,7 +5,7 @@ EXPOSE 8080
 # Version should be assigned in build time
 # Take care editing the ZANATA_VERSION line: just version numbers,
 # otherwise runapp.sh cannot parse it.
-ARG ZANATA_VERSION=4.4.3
+ARG ZANATA_VERSION=4.4.4
 ARG MYSQL_CONNECTOR_JAVA_VERSION=5.1.26
 
 # Database Setup
