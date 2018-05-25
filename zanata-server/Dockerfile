@@ -38,8 +38,8 @@ USER jboss
 RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/mysql-connector-java.jar https://repo1.maven.org/maven2/mysql/mysql-connector-java/${MYSQL_CONNECTOR_JAVA_VERSION}/mysql-connector-java-${MYSQL_CONNECTOR_JAVA_VERSION}.jar
 
 # Zanata war
-RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/zanata.war \
+RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/ROOT.war \
     https://github.com/zanata/zanata-platform/releases/download/platform-${ZANATA_VERSION}/zanata-war-${ZANATA_VERSION}.war \
-    && chmod o+rw /opt/jboss/wildfly/standalone/deployments/zanata.war
+    && chmod o+rw /opt/jboss/wildfly/standalone/deployments/ROOT.war
 
 ADD conf/standalone.xml /opt/jboss/wildfly/standalone/configuration/
