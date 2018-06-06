@@ -4,28 +4,63 @@ This repository includes files that are necessary to build docker images for Zan
 
  * [zanata-server](zanata-server/README.md): Zanata Server docker image.
  * [fedora-package](fedora-package/): For Fedora package review and build.
- * [image-make](image-make): Script to build docker images.
+ * [image-make](image-make): Script to build non-zanata-server docker images .
+ * [DockerHelper.py](DockerHelper.py): Script to build zanata-server docker images.
 
 For people who are in charge of publishing Zanata docker images,
 or interested in customizing Zanata docker images, read on.
 
-## Build Zanata Docker Images
-Firstly, clone this repository and `cd` into the checked out directory.
+## Publish Zanata Docker Images
+Publish means to build, tag and push images to registry.
+Note that only Zanata team is able to publish Zanata docker images
 
-Then, use `image-make` to build the image.
+Firstly, clone this repository and `cd` into the checked out directory.
+Then, login to docker from command line:
+```sh
+docker login
+```
+If you do not have docker login yet, see section **Login to docker hub Account**.
+
+So far, we have `DockerHelper.py` (new script) for zanata-server, and
+`image-make` (old script) for everything else.
+
+### Publish zanata-server Docker Images
+Use `DockerHelper.py` to publish the zanata-server images.
+
+For usage:
+```sh
+./DockerHelper.py -h
+```
+
+Usually, we can just publish images with 'auto' setting.
+```sh
+./DockerHelper.py publish server auto
+```
+It basically means use the latest released zanata-platform version and the next postrelease number.
+
+The **postrelease** number is the number that indicates the changes on the `zanata-docker-files`
+including changes `Dockerfile` and configuration associated with production docker images.
+It start as 1 when it is built for the first time for the released zanata-platform version.
+
+For example, `4.4.3-1` means it is the first docker image build against version 4.4.3.
+
+You can also specify the tag like:
+```sh
+./DockerHelper.py publish server 4.4.3-2
+```
+
+### Publish other Docker Images
+Use `image-make` to build the non-zanata-server image.
 
 For usage:
 ```sh
 ./image-make -h
 ```
 
-To build the version `4.3.0` and tag it as latest:
+To publish the image from centos-repo-builder:
 ```sh
-./image-make -t latest -t 4.3.0 zanata-server
+./image-make -p centos-repo-builder
 ```
-
-## Zanata Docker Image Releasing
-Zanata docker image release are made by Zanata team members.
 
 ### Login to docker hub Account
 If you do not have a Docker Hub account, register at
@@ -39,29 +74,6 @@ Run the following command and enter the docker registry username and password:
 docker login docker.io
 ```
 
-### Update Dockerfile
-If you only need to change the version, no need to change the Dockerfile manually,
-`image-make` takes care of this.
-
-If you do need to change more than version, remember in next step,
-you need to append sequence number '-1' after the version. For example,
-if you change Dockerfile after version 4.3.0, then you need to tag
-the image as `4.3.0-1`.
-
-If you need to change the Dockerfile again, then bump the sequence number to -2, and so on.
-
-### Release Image to DockerHub
-Script `image-make` with option `-r` releases image to DockerHub. For example,
-to release zanata-server `4.3.0-1`, run:
-
-```sh
-./image-make -r 4.3.0-1 zanata-server
-```
-
-See the in-line help for the actual behavior of `./image-make -r` by running:
-```sh
-./image-make -h
-```
 
 _Note: These images are provided on a best-effort basis. Pull requests are most welcome_
 

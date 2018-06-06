@@ -7,8 +7,8 @@ The following instructions assume that you have cloned this repository
 and opened a terminal in the zanata-server directory.
 
 ## Build Image
-This section is for developers who want to build images.
-Skip to next section if you just want to use Zanata.
+The latest zanata-server image is available as `docker.io/zanata/server:latest`,
+skip to next section if you just want to use zanata-server.
 
 To build the latest released Zanata server, run the following command:
 ```sh
@@ -17,7 +17,7 @@ $ docker build -t zanata/server .
 
 You can also specify the version you want to build. For example, you can build version 4.2.1 with the following command:
 ```sh
-$ docker build -t zanata/server:4.2.1 --build-arg=ZANATA_VERSION=4.2.1 .
+$ docker build -t zanata/server:4.4.3 --build-arg=ZANATA_VERSION=4.4.3 .
 ```
 
 Note that for older versions, you may need to edit `standalone.xml` to make Zanata work.
