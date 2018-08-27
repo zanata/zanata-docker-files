@@ -248,10 +248,10 @@ for tag in "${TagArray[@]}";do
                 if [ $IsPush -eq 1 ];then
                     run_command docker push $ZANATA_DOCKER_PUSH_REGISTRY/$Image
                     if [[ $CENTOS_VERSION = $CENTOS_VERSION_DEFAULT ]];then
-                        run_command docker push $ZANATA_DOCKER_PUSH_REGISTRY/$DockerName:$tag
+                        run_command docker push $ZANATA_DOCKER_PUSH_REGISTRY/$RepoName/$DockerName:$tag
                     fi
                     if [[ $tag = 'latest' ]];then
-                        run_command docker push $ZANATA_DOCKER_PUSH_REGISTRY/$DockerName:$CENTOS_VERSION
+                        run_command docker push $ZANATA_DOCKER_PUSH_REGISTRY/$RepoName/$DockerName:$CENTOS_VERSION
                     fi
                 fi
             done

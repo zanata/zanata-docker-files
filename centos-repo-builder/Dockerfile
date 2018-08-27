@@ -9,14 +9,15 @@ ARG RPMBUILD_SOURCEDIR="/rpmbuild/SOURCES"
 ## Override this if you want to test zanata-docker-files pull requests
 ARG BRANCH=master
 
-LABEL build="20180111" \
+LABEL build="20180903" \
     description="Build EPEL RPMs and create repository for Fedora People repository"
 
 ENV EXTRA_PACKAGES="java-1.8.0-openjdk-devel"
 
-ENTRYPOINT ["/home/builder/build"]
+ENTRYPOINT ["/home/builder/build.py"]
 
-RUN yum install -y createrepo rpm-build rpmdevtools sudo yum-utils $EXTRA_PACKAGES && yum clean all
+RUN yum install -y createrepo openssh-clients openssh-server rpm-build rpmdevtools sudo rsync\
+    yum-utils python-argparse $EXTRA_PACKAGES && yum clean all
 
 # create the user and home
 RUN useradd -m -G wheel -d /home/builder -u $UID $USER &&\
@@ -29,13 +30,13 @@ VOLUME $REPO_DIR $RPMBUILD_SOURCEDIR
 
 WORKDIR /home/builder
 ADD "https://raw.githubusercontent.com/zanata/zanata-docker-files/$BRANCH/centos-repo-builder/_rpmmacros" .rpmmacros
-ADD "https://raw.githubusercontent.com/zanata/zanata-docker-files/$BRANCH/centos-repo-builder/build" build
-RUN chown $USER .rpmmacros build && chmod 755 build
+ADD "https://raw.githubusercontent.com/zanata/zanata-docker-files/$BRANCH/centos-repo-builder/build.py" build.py
+RUN chown $USER .rpmmacros build.py && chmod 755 build.py
 
 USER $USER
 
 ## Use @""CENTOS_VERSION@ to avoid it beening replaced by image-make
-RUN for f in .rpmmacros build ; do\
+RUN for f in .rpmmacros build.py ; do\
 	sed -i -e "s|@""CENTOS_VERSION@|$CENTOS_VERSION|g" $f &&\
 	sed -i -e "s|@REPO_DIR@|$REPO_DIR|g" $f &&\
 	sed -i -e "s|@RPMBUILD_TOPDIR@|$RPMBUILD_TOPDIR|g" $f &&\
