@@ -29,11 +29,27 @@ locale.setlocale(locale.LC_ALL, 'C')
 
 
 def run_check_call(cmd):
+    """Display debug messages, run command, then check the exit code
+
+    Args:
+        cmd (List[str]): Command to be run
+
+    Returns:
+        int: exit status of cmd
+    """
     logging.debug(" ".join(cmd))
-    subprocess.check_call(cmd)
+    return subprocess.check_call(cmd)
 
 
 def run_check_output(cmd):
+    """Display debug messages, run command, then return the stdout as str
+
+    Args:
+        cmd ([type]):  Command to be run
+
+    Returns:
+        str: stdout from executing the cmd
+    """
     logging.debug(" ".join(cmd))
     # EL6 does not have subprocess.check_output
     proc = subprocess.Popen(cmd, stdout=subprocess.PIPE)
@@ -41,22 +57,35 @@ def run_check_output(cmd):
 
 
 def rsync(src, dest, options=None):
-    RSYNC_CMD = ['/usr/bin/rsync']
-    RSYNC_OPTIONS = [
+    """Rsync from src to dest
+
+    Args:
+        src (str): sync source in form of [[USER@]HOST:]DIR
+        dest (str): sync destination in form of [[USER@]HOST:]DIR
+        options (List[str], optional): Defaults to None.
+                Additional rsync options.
+
+    Returns:
+        int: exit status of cmd
+    """
+    cmd_prefix = [
+            '/usr/bin/rsync',
             '--cvs-exclude', '--recursive', '--verbose', '--links',
             '--update', '--compress', '--exclude', '*.core', '--stats',
             '--progress', '--archive', '--keep-dirlinks', '--delete']
-    cmd_prefix = RSYNC_CMD + RSYNC_OPTIONS
     if options:
         cmd_prefix += options
 
     full_cmd = cmd_prefix + [src, dest]
-    run_check_call(full_cmd)
+
+    return run_check_call(full_cmd)
 
 
 class RpmSpec(object):
-    """
-    RPM Spec
+    """Content of a RPM spec file
+
+    Attributes:
+        content: RPM spec file content as List of strings.
     """
 
     # We only interested in these tags

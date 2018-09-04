@@ -3,18 +3,22 @@
 ###     run - run the centos-repo-builder
 ###
 ### SYNOPSIS
-###     run [Options] <distroVersion> <specFilename> <repoDir>
-###     run [Options] -R [host:]dir <distroVersion> <specFilename>
+###     run [Options] <specFilename> <repoDir>
+###     run [Options] -S [rsync_src] <specFilename>
 ###
 ### DESCRIPTION
-###     This program builds RPMs from a given SPEC file and update
-### yum/dnf repodata.
+###     This program builds RPMs from a given SPEC file,
+### update to provided version, then update yum repodata.
 ###
-### <distroVersion> is the CentOS version you like to build from.
-### Like 7 to build from CentOS 7.
+### This program can get the repositoy from local or remote directory.
+###
+### With local reposity
 ###
 ### <specfilename> is the RPM SPEC filename. Currently, the SPEC file
 ### need to be in repoDir.
+### <distroVersion> is the CentOS version you like to build from.
+### Like 7 to build from CentOS 7.
+###
 ###
 ### <repoDir> is the directory that will host repository data and
 ### RPM files. <repoDir> is also a volume for docker.
@@ -24,6 +28,7 @@ set -eu
 shopt -s globstar
 ScriptDir=$(dirname $(realpath $0))
 ProgramName=$(basename $0)
+DOCKER_IMAGE=docker.io/zanata/centos-repo-builder
 
 ##=== function definition Start ===
 ## Get EXIT_STATUS and other environment variables from zanata-scripts
@@ -44,13 +49,14 @@ RsyncRemote=
 
 ###
 ### Options
-while getopts "hbdn:o:rs:A:R:" opt;do
+while getopts "hbdO:S:D:u:" opt;do
     case $opt in
 ###     -h: Show detail help.
         h )
             zanata_help_raw $0
             exit ${EXIT_OK}
             ;;
+
 ###
 ###     -A <rsync options>:
 ###         rsync options. Option 'R' is also required for rsync to and from container
