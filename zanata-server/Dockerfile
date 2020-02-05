@@ -43,3 +43,6 @@ RUN curl -L -o /opt/jboss/wildfly/standalone/deployments/ROOT.war \
     && chmod o+rw /opt/jboss/wildfly/standalone/deployments/ROOT.war
 
 ADD conf/standalone.xml /opt/jboss/wildfly/standalone/configuration/
+
+# Set the server locale so that UTF-8 documents can be uploaded
+ENV LANG en_US.UTF-8
